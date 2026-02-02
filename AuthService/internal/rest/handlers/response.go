@@ -16,5 +16,5 @@ func newErrorResponse(ctx *gin.Context, handlerName string, statusCode int, err 
 		"path":    ctx.Request.URL.Path,
 		"method":  ctx.Request.Method,
 	}).Warn("handler error")
-	ctx.JSON(statusCode, errorResponse{Message: err.Error()})
+	ctx.AbortWithStatusJSON(statusCode, errorResponse{Message: err.Error()})
 }

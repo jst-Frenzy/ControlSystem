@@ -13,15 +13,15 @@ import (
 )
 
 func TestHandler_signUp(t *testing.T) {
-	type mockBehavior func(s *mock_AuthService.MockAuthPostgresRepo)
+	type mockBehavior func(s *mock_AuthService.MockAuthService)
 
 	testTable := []struct {
-		name                string
-		inputBody           string
-		inputUser           AuthService.UserSignUp
-		mockBehavior        mockBehavior
-		expectedStatusCode  int
-		expectedRequestBody string
+		name                 string
+		inputBody            string
+		inputUser            AuthService.UserSignUp
+		mockBehavior         mockBehavior
+		expectedStatusCode   int
+		expectedResponseBody string
 	}{
 		{
 			name:      "OK",
@@ -31,18 +31,18 @@ func TestHandler_signUp(t *testing.T) {
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
-			mockBehavior: func(s *mock_AuthService.MockAuthPostgresRepo) {
-				s.EXPECT().CreateUser(gomock.Any()).Return(1, nil)
+			mockBehavior: func(s *mock_AuthService.MockAuthService) {
+				s.EXPECT().SignUp(gomock.Any()).Return(1, nil)
 			},
-			expectedStatusCode:  201,
-			expectedRequestBody: `{"id":1}`,
+			expectedStatusCode:   201,
+			expectedResponseBody: `{"id":1}`,
 		},
 		{
-			name:                "Empty fields",
-			inputBody:           `{"user_name": "test", "password":"qwerty"}`,
-			mockBehavior:        func(s *mock_AuthService.MockAuthPostgresRepo) {},
-			expectedStatusCode:  400,
-			expectedRequestBody: `{"Message":"invalid input body"}`,
+			name:                 "Empty fields",
+			inputBody:            `{"user_name": "test", "password":"qwerty"}`,
+			mockBehavior:         func(s *mock_AuthService.MockAuthService) {},
+			expectedStatusCode:   400,
+			expectedResponseBody: `{"Message":"invalid input body"}`,
 		},
 		{
 			name:      "Service Error",
@@ -52,11 +52,11 @@ func TestHandler_signUp(t *testing.T) {
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
-			mockBehavior: func(s *mock_AuthService.MockAuthPostgresRepo) {
-				s.EXPECT().CreateUser(gomock.Any()).Return(0, errors.New("ServiceFailure"))
+			mockBehavior: func(s *mock_AuthService.MockAuthService) {
+				s.EXPECT().SignUp(gomock.Any()).Return(0, errors.New("ServiceFailure"))
 			},
-			expectedStatusCode:  500,
-			expectedRequestBody: `{"Message":"ServiceFailure"}`,
+			expectedStatusCode:   500,
+			expectedResponseBody: `{"Message":"ServiceFailure"}`,
 		},
 	}
 
@@ -66,13 +66,10 @@ func TestHandler_signUp(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			authRepo := mock_AuthService.NewMockAuthPostgresRepo(c)
-			testCase.mockBehavior(authRepo)
+			authServ := mock_AuthService.NewMockAuthService(c)
+			testCase.mockBehavior(authServ)
 
-			manager := mock_AuthService.NewMockTokenManager(c)
-
-			services := AuthService.NewAuthService(authRepo, manager)
-			handler := NewAuthHandler(services)
+			handler := NewAuthHandler(authServ)
 
 			//Test Server
 			r := gin.New()
@@ -88,7 +85,7 @@ func TestHandler_signUp(t *testing.T) {
 
 			//Assert
 			assert.Equal(t, testCase.expectedStatusCode, w.Code)
-			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+			assert.Equal(t, testCase.expectedResponseBody, w.Body.String())
 		})
 	}
 }

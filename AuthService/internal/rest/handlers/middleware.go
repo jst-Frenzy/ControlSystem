@@ -25,9 +25,20 @@ func (h *AuthHandler) UserIdentity(ctx *gin.Context) {
 		return
 	}
 
+	if headerParts[0] != "Bearer" {
+		newErrorResponse(ctx, "UserIdentity", http.StatusUnauthorized, errors.New("invalid auth header"))
+		return
+	}
+
+	if headerParts[1] == "" {
+		newErrorResponse(ctx, "UserIdentity", http.StatusUnauthorized, errors.New("token is empty"))
+		return
+	}
+
 	userID, role, err := h.service.ParseToken(headerParts[1])
 	if err != nil {
 		newErrorResponse(ctx, "UserIdentity", http.StatusUnauthorized, err)
+		return
 	}
 	ctx.Set(userIDCtx, userID)
 	ctx.Set(userRoleCtx, role)
