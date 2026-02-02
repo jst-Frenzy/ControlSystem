@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package auth;
+option go_package = "./proto";
+
+service AuthService {
+  rpc SignIn(SignInRequest) returns (SignInResponse);
+}
+
+message SignInRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message SignInResponse {
+  string message = 1;
+}
