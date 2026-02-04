@@ -10,11 +10,13 @@ import (
 )
 
 func main() {
-
+	dataBase.InitRedis()
 	dataBase.InitPostgres()
+
 	authPostgresRepo := AuthService.NewAuthPostgresRepo(dataBase.PostgresDB)
+	authRedisRepo := AuthService.NewAuthRedisRepo(dataBase.RedisDB)
 	tokenManager := AuthService.NewManager(os.Getenv("SIGNING_KEY"))
-	authService := AuthService.NewAuthService(authPostgresRepo, tokenManager)
+	authService := AuthService.NewAuthService(authPostgresRepo, authRedisRepo, tokenManager)
 	authHandler := handlers.NewAuthHandler(authService)
 
 	router := gin.Default()

@@ -36,7 +36,7 @@ func (h *AuthHandler) SignUp(ctx *gin.Context) {
 func (h *AuthHandler) SignIn(ctx *gin.Context) {
 	var user AuthService.UserSignIn
 	if err := ctx.ShouldBind(&user); err != nil {
-		newErrorResponse(ctx, "SignIn", http.StatusBadRequest, err)
+		newErrorResponse(ctx, "SignIn", http.StatusBadRequest, errors.New("invalid input body"))
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *AuthHandler) Refresh(ctx *gin.Context) {
 
 	newAccessToken, err := h.service.RefreshTokens(refreshToken.RefreshToken)
 	if err != nil {
-		newErrorResponse(ctx, "Refresh", http.StatusUnauthorized, err)
+		newErrorResponse(ctx, "Refresh", http.StatusInternalServerError, err)
 		return
 	}
 

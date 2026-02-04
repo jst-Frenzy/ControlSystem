@@ -64,8 +64,8 @@ func (m *manager) Parse(accessToken string) (int, string, error) {
 	}
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		var userID int
-		_, err := fmt.Sscanf(claims.Subject, "%d", &userID)
-		if err != nil {
+		_, errScan := fmt.Sscanf(claims.Subject, "%d", &userID)
+		if errScan != nil {
 			return 0, "", errors.New("invalid user ID in token")
 		}
 		return userID, claims.Role, nil

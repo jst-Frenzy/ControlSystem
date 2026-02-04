@@ -2,15 +2,14 @@ package AuthService
 
 import (
 	"gorm.io/gorm"
-	"time"
 )
 
-//go:generate mockgen -source=postgresRep.go -destination=mocks/mockRep.go
+//go:generate mockgen -source=postgresRep.go -destination=mocks/mockPostgres.go
 
 type AuthPostgresRepo interface {
 	GetUser(string) (User, error)
-	CreateUser(User) (int, error)
-	SaveRefreshToken(int, string, time.Time) error
+	CreateUser(User) (User, error)
+	SaveRefreshToken(RefreshToken) error
 	GetUserByRefreshToken(string) (User, error)
 }
 
@@ -31,21 +30,16 @@ func (r *authPostgresRepo) GetUser(email string) (User, error) {
 	return foundUser, nil
 }
 
-func (r *authPostgresRepo) CreateUser(u User) (int, error) {
+func (r *authPostgresRepo) CreateUser(u User) (User, error) {
 	var err error
 	if err = r.db.Table("users").Create(&u).Error; err != nil {
-		return 0, err
+		return User{}, err
 	}
-	return u.ID, nil
+	return u, nil
 }
 
-func (r *authPostgresRepo) SaveRefreshToken(userID int, tokenHash string, expiresAt time.Time) error {
-	refreshToken := RefreshToken{
-		UserID:    userID,
-		TokenHash: tokenHash,
-		ExpiresAt: expiresAt,
-	}
-	return r.db.Table("refresh_tokens").Create(refreshToken).Error
+func (r *authPostgresRepo) SaveRefreshToken(token RefreshToken) error {
+	return r.db.Table("refresh_tokens").Create(&token).Error
 }
 
 func (r *authPostgresRepo) GetUserByRefreshToken(refreshTokenHash string) (User, error) {

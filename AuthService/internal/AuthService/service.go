@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -18,13 +19,15 @@ type AuthService interface {
 }
 
 type authService struct {
-	repo         AuthPostgresRepo
+	repoPostgres AuthPostgresRepo
+	repoRedis    AuthRedisRepo
 	tokenManager TokenManager
 }
 
-func NewAuthService(repo AuthPostgresRepo, tokenManager TokenManager) AuthService {
+func NewAuthService(repoPostgres AuthPostgresRepo, repoRedis AuthRedisRepo, tokenManager TokenManager) AuthService {
 	return &authService{
-		repo:         repo,
+		repoPostgres: repoPostgres,
+		repoRedis:    repoRedis,
 		tokenManager: tokenManager,
 	}
 }
@@ -40,13 +43,38 @@ func (as *authService) SignUp(u UserSignUp) (int, error) {
 		Email:        u.Email,
 		PasswordHash: passwordHash,
 	}
-	return as.repo.CreateUser(user)
+
+	createdUser, err := as.repoPostgres.CreateUser(user)
+	if err != nil {
+		return 0, err
+	}
+
+	go func() {
+		if errCache := as.repoRedis.AddUserWithEmail(createdUser); errCache != nil {
+			logrus.Warn("can't save user to cache")
+		}
+	}()
+
+	return createdUser.ID, nil
 }
 
 func (as *authService) SignIn(u UserSignIn) (Tokens, error) {
-	user, errGet := as.repo.GetUser(u.Email)
-	if errGet != nil {
-		return Tokens{}, errGet
+	var user User
+	var err error
+	user, err = as.repoRedis.GetUserWithEmail(u.Email)
+	if err != nil {
+		logrus.Warn(err)
+
+		user, err = as.repoPostgres.GetUser(u.Email)
+		if err != nil {
+			return Tokens{}, err
+		}
+
+		go func() {
+			if errCache := as.repoRedis.AddUserWithEmail(user); errCache != nil {
+				logrus.Warn("can't save user to cache")
+			}
+		}()
 	}
 
 	if !as.checkPassword(u.Password, user.PasswordHash) {
@@ -58,9 +86,24 @@ func (as *authService) SignIn(u UserSignIn) (Tokens, error) {
 
 func (as *authService) RefreshTokens(refreshToken string) (string, error) {
 	hashRefreshToken := as.makeHash(refreshToken)
-	user, errGet := as.repo.GetUserByRefreshToken(hashRefreshToken)
-	if errGet != nil {
-		return "", errGet
+
+	var user User
+	var err error
+
+	user, err = as.repoRedis.GetUserWithRefreshToken(hashRefreshToken)
+	if err != nil {
+		logrus.Warn(err)
+
+		user, err = as.repoPostgres.GetUserByRefreshToken(hashRefreshToken)
+		if err != nil {
+			return "", err
+		}
+
+		go func() {
+			if errCache := as.repoRedis.AddUserWithRefreshToken(user, hashRefreshToken); errCache != nil {
+				logrus.Warn("can't save user to cache")
+			}
+		}()
 	}
 
 	accessToken, errAccess := as.tokenManager.NewJWT(user, accessTTL)
@@ -86,10 +129,22 @@ func (as *authService) generateTokensPair(user User) (Tokens, error) {
 
 	refreshExpiresAt := time.Now().Add(refreshTTL)
 
-	errSave := as.repo.SaveRefreshToken(user.ID, hashRefreshToken, refreshExpiresAt)
+	refreshTokenStruct := RefreshToken{
+		UserID:    user.ID,
+		TokenHash: hashRefreshToken,
+		ExpiresAt: refreshExpiresAt,
+	}
+
+	errSave := as.repoPostgres.SaveRefreshToken(refreshTokenStruct)
 	if errSave != nil {
 		return Tokens{}, errSave
 	}
+
+	go func() {
+		if errCache := as.repoRedis.AddUserWithRefreshToken(user, hashRefreshToken); errCache != nil {
+			logrus.Warn("can't save user to cache")
+		}
+	}()
 
 	return Tokens{
 		AccessToken:  accessToken,

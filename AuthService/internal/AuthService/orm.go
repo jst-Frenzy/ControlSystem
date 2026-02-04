@@ -2,17 +2,22 @@ package AuthService
 
 import "time"
 
+const (
+	userEmailTTL        = 15 * time.Minute
+	userRefreshTokenTTL = 45 * time.Minute
+)
+
 type User struct {
-	ID       int
-	UserName string
+	ID       int    `redis:"ID"`
+	UserName string `redis:"UserName"`
 
-	Email        string
-	PasswordHash string
+	Email        string `redis:"Email"`
+	PasswordHash string `redis:"PasswordHash"`
 
-	Role string
+	Role string `redis:"Role"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `redis:"CreatedAt"`
+	UpdatedAt time.Time `redis:"UpdatedAt"`
 }
 
 type RefreshToken struct {
