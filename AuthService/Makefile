@@ -13,3 +13,6 @@ migrate-down:
 
 lint:
 	golangci-lint run
+
+proto:
+	protoc --proto_path=./proto --go_out=./internal/gRPC/gen --go_opt=paths=source_relative --go-grpc_out=./internal/gRPC/gen --go-grpc_opt=paths=source_relative proto/auth.proto

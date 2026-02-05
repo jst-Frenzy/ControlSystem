@@ -3,13 +3,18 @@ package main
 import (
 	"AuthService/internal/AuthService"
 	"AuthService/internal/dataBase"
+	"AuthService/internal/gRPC"
 	"AuthService/internal/rest/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
+	logger := logrus.New()
 	dataBase.InitRedis()
 	dataBase.InitPostgres()
 
@@ -17,6 +22,20 @@ func main() {
 	authRedisRepo := AuthService.NewAuthRedisRepo(dataBase.RedisDB)
 	tokenManager := AuthService.NewManager(os.Getenv("SIGNING_KEY"))
 	authService := AuthService.NewAuthService(authPostgresRepo, authRedisRepo, tokenManager)
+
+	grpcServer := gRPC.NewGRPCServer(gRPC.Deps{
+		Logger:      logger,
+		AuthService: authService,
+	})
+
+	go func() {
+		port := 50051
+
+		if err := grpcServer.StartGRPC(port); err != nil {
+			logger.WithError(err).Fatal("gRPC server failed")
+		}
+	}()
+
 	authHandler := handlers.NewAuthHandler(authService)
 
 	router := gin.Default()
@@ -31,8 +50,17 @@ func main() {
 		}
 	}
 
-	err := router.Run(":8080")
-	if err != nil {
-		logrus.WithError(err).Fatalf("Can not to start Auth server")
-	}
+	go func() {
+		if err := router.Run(":8080"); err != nil {
+			logrus.WithError(err).Fatalf("REST server failed")
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	grpcServer.Stop()
+
+	time.Sleep(2 * time.Second)
 }
