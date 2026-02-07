@@ -42,6 +42,7 @@ func (as *authService) SignUp(u UserSignUp) (int, error) {
 		UserName:     u.UserName,
 		Email:        u.Email,
 		PasswordHash: passwordHash,
+		Role:         "user",
 	}
 
 	createdUser, err := as.repoPostgres.CreateUser(user)
