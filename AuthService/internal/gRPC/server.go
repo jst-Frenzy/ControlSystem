@@ -8,7 +8,7 @@ import (
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
-	gen "github.com/jst-frenzy/ControlSystem/protobuf/gen"
+	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
