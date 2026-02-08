@@ -1,12 +1,12 @@
 package gRPC
 
 import (
-	mock_AuthService "AuthService/internal/AuthService/mocks"
-	gen "AuthService/internal/gRPC/gen"
 	"context"
 	"errors"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
+	mock_AuthService "github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService/mocks"
+	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"testing"

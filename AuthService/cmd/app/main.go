@@ -1,11 +1,11 @@
 package main
 
 import (
-	"AuthService/internal/AuthService"
-	"AuthService/internal/dataBase"
-	"AuthService/internal/gRPC"
-	"AuthService/internal/rest/handlers"
 	"github.com/gin-gonic/gin"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/dataBase"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/gRPC"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/rest/handlers"
 	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"

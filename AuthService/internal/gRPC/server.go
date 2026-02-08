@@ -1,14 +1,14 @@
 package gRPC
 
 import (
-	"AuthService/internal/AuthService"
-	gen "AuthService/internal/gRPC/gen"
 	"context"
 	"errors"
 	"fmt"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
+	gen "github.com/jst-frenzy/ControlSystem/protobuf/gen"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"AuthService/internal/AuthService"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
 	"net/http"
 )
 
