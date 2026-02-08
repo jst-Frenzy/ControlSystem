@@ -1,9 +1,9 @@
 package AuthService
 
 import (
-	"AuthService/internal/AuthService"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"

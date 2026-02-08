@@ -1,13 +1,13 @@
 package AuthService_test
 
 import (
-	"AuthService/internal/AuthService"
-	mockauthservice "AuthService/internal/AuthService/mocks"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
+	mockauthservice "github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService/mocks"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
 )

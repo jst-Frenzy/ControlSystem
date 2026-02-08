@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/gRPC/gen"
+	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"time"
@@ -12,7 +12,7 @@ import (
 
 type AuthClient struct {
 	conn   *grpc.ClientConn
-	client proto.AuthServiceClient
+	client gen.AuthServiceClient
 }
 
 func NewAuthClient(addr string) (*AuthClient, error) {
@@ -23,12 +23,12 @@ func NewAuthClient(addr string) (*AuthClient, error) {
 
 	return &AuthClient{
 		conn:   conn,
-		client: proto.NewAuthServiceClient(conn),
+		client: gen.NewAuthServiceClient(conn),
 	}, nil
 }
 
-func (c *AuthClient) ValidateToken(ctx context.Context, token string) (*proto.ValidateTokenResponse, error) {
-	req := &proto.ValidateTokenRequest{AccessToken: token}
+func (c *AuthClient) ValidateToken(ctx context.Context, token string) (*gen.ValidateTokenResponse, error) {
+	req := &gen.ValidateTokenRequest{AccessToken: token}
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()

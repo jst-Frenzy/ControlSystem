@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	mock_AuthService "AuthService/internal/AuthService/mocks"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
+	mock_AuthService "github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService/mocks"
 	"net/http/httptest"
 	"testing"
 )
