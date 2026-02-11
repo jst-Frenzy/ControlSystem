@@ -16,15 +16,16 @@ func NewAuthHandler(service AuthService.AuthService) *AuthHandler {
 }
 
 func (h *AuthHandler) SignUp(ctx *gin.Context) {
+	nameHandler := "SignUp"
 	var user AuthService.UserSignUp
 	if err := ctx.ShouldBind(&user); err != nil {
-		newErrorResponse(ctx, "SignUp", http.StatusBadRequest, errors.New("invalid input body"))
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	id, err := h.service.SignUp(user)
 	if err != nil {
-		newErrorResponse(ctx, "SignUP", http.StatusInternalServerError, err)
+		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -34,15 +35,16 @@ func (h *AuthHandler) SignUp(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) SignIn(ctx *gin.Context) {
+	nameHandler := "SignIn"
 	var user AuthService.UserSignIn
 	if err := ctx.ShouldBind(&user); err != nil {
-		newErrorResponse(ctx, "SignIn", http.StatusBadRequest, errors.New("invalid input body"))
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
 	tokens, err := h.service.SignIn(user)
 	if err != nil {
-		newErrorResponse(ctx, "SignIn", http.StatusInternalServerError, err)
+		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -53,19 +55,45 @@ func (h *AuthHandler) SignIn(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) Refresh(ctx *gin.Context) {
+	nameHandler := "Refresh"
 	var refreshToken AuthService.RefreshTokenRequest
 	if err := ctx.ShouldBind(&refreshToken); err != nil {
-		newErrorResponse(ctx, "Refresh", http.StatusBadRequest, err)
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	newAccessToken, err := h.service.RefreshTokens(refreshToken.RefreshToken)
 	if err != nil {
-		newErrorResponse(ctx, "Refresh", http.StatusInternalServerError, err)
+		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"access token": newAccessToken,
 	})
+}
+
+func (h *AuthHandler) ChangeRole(ctx *gin.Context) {
+	nameHandler := "ChangeRole"
+	type data struct {
+		user    AuthService.UserSignIn
+		newRole string
+		id      int
+	}
+	var d data
+	if err := ctx.ShouldBind(&d); err != nil {
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.service.ChangeRole(d.user, d.id, d.newRole)
+	if err != nil {
+		if errors.Is(err, errors.New("not enough rights")) {
+			newErrorResponse(ctx, nameHandler, http.StatusBadRequest, err.Error())
+			return
+		}
+		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{})
 }

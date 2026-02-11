@@ -3,16 +3,15 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
 const (
 	authorizationHeader = "Authorization"
-	userIDCtx           = "userID"
-	userRoleCtx         = "userRole"
 )
 
-func (h *AuthHandler) UserIdentity(ctx *gin.Context) {
+func (h *GoodsHandlers) UserIdentity(ctx *gin.Context) {
 	nameHandler := "UserIdentity"
 	header := ctx.GetHeader(authorizationHeader)
 	if header == "" {
@@ -35,11 +34,25 @@ func (h *AuthHandler) UserIdentity(ctx *gin.Context) {
 		return
 	}
 
-	userID, role, err := h.service.ParseToken(headerParts[1])
+	token := headerParts[1]
+
+	response, err := h.authClient.ValidateToken(ctx, token)
 	if err != nil {
-		newErrorResponse(ctx, nameHandler, http.StatusUnauthorized, err.Error())
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, err.Error())
 		return
 	}
-	ctx.Set(userIDCtx, userID)
-	ctx.Set(userRoleCtx, role)
+	if !response.Valid {
+		newErrorResponse(ctx, nameHandler, http.StatusUnauthorized, "invalid token")
+		return
+	}
+
+	id, err := strconv.Atoi(response.UserId)
+	if err != nil {
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "invalid user id")
+		return
+	}
+
+	ctx.Set("userID", id)
+	ctx.Set("userRole", response.Role)
+	ctx.Set("userName", response.Us)
 }

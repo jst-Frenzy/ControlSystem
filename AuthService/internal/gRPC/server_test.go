@@ -17,7 +17,7 @@ func TestServer_ValidateToken(t *testing.T) {
 
 	testTable := []struct {
 		name                          string
-		inputValidateTokenRequest     gen.ValidateTokenRequest
+		inputValidateTokenRequest     *gen.ValidateTokenRequest
 		inputAccessToken              string
 		mockBehavior                  mockBehavior
 		expectedValidateTokenResponse *gen.ValidateTokenResponse
@@ -25,7 +25,7 @@ func TestServer_ValidateToken(t *testing.T) {
 	}{
 		{
 			name:                      "OK",
-			inputValidateTokenRequest: gen.ValidateTokenRequest{AccessToken: "access_token"},
+			inputValidateTokenRequest: &gen.ValidateTokenRequest{AccessToken: "access_token"},
 			inputAccessToken:          "access_token",
 			mockBehavior: func(s *mock_AuthService.MockAuthService, accessToken string) {
 				s.EXPECT().ParseToken(accessToken).Return(1, "user", nil)
@@ -39,7 +39,7 @@ func TestServer_ValidateToken(t *testing.T) {
 		},
 		{
 			name:                          "EmptyAccessToken",
-			inputValidateTokenRequest:     gen.ValidateTokenRequest{AccessToken: ""},
+			inputValidateTokenRequest:     &gen.ValidateTokenRequest{AccessToken: ""},
 			inputAccessToken:              "",
 			mockBehavior:                  func(s *mock_AuthService.MockAuthService, accessToken string) {},
 			expectedValidateTokenResponse: nil,
@@ -47,7 +47,7 @@ func TestServer_ValidateToken(t *testing.T) {
 		},
 		{
 			name:                      "Fail Parse Token",
-			inputValidateTokenRequest: gen.ValidateTokenRequest{AccessToken: "access_token"},
+			inputValidateTokenRequest: &gen.ValidateTokenRequest{AccessToken: "access_token"},
 			inputAccessToken:          "access_token",
 			mockBehavior: func(s *mock_AuthService.MockAuthService, accessToken string) {
 				s.EXPECT().ParseToken(accessToken).Return(0, "", errors.New("fail parse"))

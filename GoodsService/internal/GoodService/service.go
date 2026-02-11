@@ -2,8 +2,9 @@ package GoodService
 
 type GoodService interface {
 	GetGoods() ([]Item, error)
-	AddItem(Item) (int, error)
-	DeleteItem(int) error
+
+	AddItem(Item) (string, error)
+	DeleteItem(string) error
 	UpdateItem(Item) (Item, error)
 }
 
@@ -15,18 +16,18 @@ func NewGoodService(repo GoodsMongoRepo) GoodService {
 	return &goodService{repo: repo}
 }
 
-func (gs *goodService) GetGoods() ([]Item, error) {
-	return gs.repo.GetGoods()
+func (s *goodService) GetGoods() ([]Item, error) {
+	return s.repo.GetGoods()
 }
 
-func (gs *goodService) AddItem(i Item) (int, error) {
-	return gs.repo.CreateItem(i)
+func (s *goodService) AddItem(i Item) (string, error) {
+	return s.repo.CreateItem(i)
 }
 
-func (gs *goodService) DeleteItem(id int) error {
-	return gs.repo.DeleteItem(id)
+func (s *goodService) DeleteItem(itemID string) error {
+	return s.repo.DeleteItem(itemID)
 }
 
-func (gs *goodService) UpdateItem(i Item) (Item, error) {
-	return gs.repo.UpdateItem(i)
+func (s *goodService) UpdateItem(i Item) (Item, error) {
+	return s.repo.UpdateItem(i)
 }

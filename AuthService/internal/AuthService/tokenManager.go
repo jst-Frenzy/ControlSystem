@@ -26,7 +26,8 @@ func NewManager(signingKey string) TokenManager {
 
 func (m *manager) NewJWT(user User, ttl time.Duration) (string, error) {
 	claims := &CustomClaims{
-		Role: user.Role,
+		Role:     user.Role,
+		UserName: user.UserName,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(ttl).Unix(),
 			IssuedAt:  time.Now().Unix(),

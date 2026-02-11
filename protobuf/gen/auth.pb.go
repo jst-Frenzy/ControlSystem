@@ -70,6 +70,7 @@ type ValidateTokenResponse struct {
 	Valid         bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	UserName      string                 `protobuf:"bytes,4,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -125,6 +126,13 @@ func (x *ValidateTokenResponse) GetRole() string {
 	return ""
 }
 
+func (x *ValidateTokenResponse) GetUserName() string {
+	if x != nil {
+		return x.UserName
+	}
+	return ""
+}
+
 var File_auth_proto protoreflect.FileDescriptor
 
 const file_auth_proto_rawDesc = "" +
@@ -132,11 +140,12 @@ const file_auth_proto_rawDesc = "" +
 	"\n" +
 	"auth.proto\x12\x04auth\"9\n" +
 	"\x14ValidateTokenRequest\x12!\n" +
-	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"Z\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\"w\n" +
 	"\x15ValidateTokenResponse\x12\x14\n" +
 	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04role\x18\x03 \x01(\tR\x04role2W\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\x12\x1b\n" +
+	"\tuser_name\x18\x04 \x01(\tR\buserName2W\n" +
 	"\vAuthService\x12H\n" +
 	"\rValidateToken\x12\x1a.auth.ValidateTokenRequest\x1a\x1b.auth.ValidateTokenResponseB\tZ\a./protob\x06proto3"
 

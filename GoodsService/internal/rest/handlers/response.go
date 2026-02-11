@@ -9,12 +9,12 @@ type errorResponse struct {
 	Message string
 }
 
-func newErrorResponse(ctx *gin.Context, handlerName string, statusCode int, err error) {
+func newErrorResponse(ctx *gin.Context, handlerName string, statusCode int, message string) {
 	logrus.WithFields(logrus.Fields{
-		"error":   err.Error(),
+		"error":   message,
 		"handler": handlerName,
 		"path":    ctx.Request.URL.Path,
 		"method":  ctx.Request.Method,
 	}).Warn("handler error")
-	ctx.AbortWithStatusJSON(statusCode, errorResponse{Message: err.Error()})
+	ctx.AbortWithStatusJSON(statusCode, errorResponse{Message: message})
 }

@@ -16,7 +16,8 @@ type Tokens struct {
 }
 
 type CustomClaims struct {
-	Role string
+	Role     string
+	UserName string
 	jwt.StandardClaims
 }
 
