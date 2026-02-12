@@ -10,7 +10,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/golang/mock v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
-	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260208215256-e3122c72dfad
+	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260211200106-9daf5332b469
 	github.com/redis/go-redis/v9 v9.17.3
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1

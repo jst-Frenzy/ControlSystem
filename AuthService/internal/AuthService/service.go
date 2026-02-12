@@ -15,7 +15,7 @@ type AuthService interface {
 	SignUp(u UserSignUp) (int, error)
 	SignIn(u UserSignIn) (Tokens, error)
 	RefreshTokens(refreshToken string) (string, error)
-	ParseToken(accessToken string) (int, string, error)
+	ParseToken(accessToken string) (int, string, string, error)
 	ChangeRole(UserSignIn, int, string) error
 }
 
@@ -161,7 +161,7 @@ func (s *authService) generateTokensPair(user User) (Tokens, error) {
 	}, nil
 }
 
-func (s *authService) ParseToken(accessToken string) (int, string, error) {
+func (s *authService) ParseToken(accessToken string) (int, string, string, error) {
 	return s.tokenManager.Parse(accessToken)
 }
 

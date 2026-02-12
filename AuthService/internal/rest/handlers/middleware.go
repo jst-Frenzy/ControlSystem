@@ -35,7 +35,7 @@ func (h *AuthHandler) UserIdentity(ctx *gin.Context) {
 		return
 	}
 
-	userID, role, err := h.service.ParseToken(headerParts[1])
+	userID, role, _, err := h.service.ParseToken(headerParts[1])
 	if err != nil {
 		newErrorResponse(ctx, nameHandler, http.StatusUnauthorized, err.Error())
 		return

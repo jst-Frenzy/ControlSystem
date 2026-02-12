@@ -51,7 +51,15 @@ func (h *GoodsHandlers) AddItem(ctx *gin.Context) {
 		return
 	}
 
-	id, err := h.serv.AddItem(i)
+	userID := ctx.MustGet("userID").(int)
+	userName := ctx.MustGet("userName").(string)
+
+	var s = GoodService.UserCtx{
+		ID:   userID,
+		Name: userName,
+	}
+
+	id, err := h.serv.AddItem(i, s)
 	if err != nil {
 		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
 		return
@@ -74,7 +82,9 @@ func (h *GoodsHandlers) DeleteItem(ctx *gin.Context) {
 		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "no id for delete item")
 	}
 
-	err := h.serv.DeleteItem(itemID)
+	userID := ctx.MustGet("userID").(int)
+
+	err := h.serv.DeleteItem(itemID, userID)
 	if err != nil {
 		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
 		return
@@ -98,7 +108,9 @@ func (h *GoodsHandlers) UpdateItem(ctx *gin.Context) {
 		return
 	}
 
-	respItem, err := h.serv.UpdateItem(i)
+	userID := ctx.MustGet("userID").(int)
+
+	respItem, err := h.serv.UpdateItem(i, userID)
 	if err != nil {
 		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
 		return

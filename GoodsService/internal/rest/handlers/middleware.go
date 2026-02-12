@@ -54,5 +54,5 @@ func (h *GoodsHandlers) UserIdentity(ctx *gin.Context) {
 
 	ctx.Set("userID", id)
 	ctx.Set("userRole", response.Role)
-	ctx.Set("userName", response.Us)
+	ctx.Set("userName", response.UserName)
 }

@@ -10,6 +10,6 @@ type Item struct {
 
 type Seller struct {
 	Id     string `bson:"_id"`
-	userID int    `bson:"user_id"`
+	UserID int    `bson:"user_id"`
 	Name   string `bson:"name"`
 }

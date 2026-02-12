@@ -13,7 +13,7 @@ import (
 type TokenManager interface {
 	NewJWT(user User, ttl time.Duration) (string, error)
 	NewRefreshToken() (string, error)
-	Parse(accessToken string) (int, string, error)
+	Parse(accessToken string) (int, string, string, error)
 }
 
 type manager struct {
@@ -53,7 +53,7 @@ func (m *manager) NewRefreshToken() (string, error) {
 	return fmt.Sprintf("%x", b), nil
 }
 
-func (m *manager) Parse(accessToken string) (int, string, error) {
+func (m *manager) Parse(accessToken string) (int, string, string, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &CustomClaims{}, func(token *jwt.Token) (i interface{}, err error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
@@ -61,16 +61,16 @@ func (m *manager) Parse(accessToken string) (int, string, error) {
 		return []byte(m.signingKey), nil
 	})
 	if err != nil {
-		return 0, "", err
+		return 0, "", "", err
 	}
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		var userID int
 		_, errScan := fmt.Sscanf(claims.Subject, "%d", &userID)
 		if errScan != nil {
-			return 0, "", errors.New("invalid user ID in token")
+			return 0, "", "", errors.New("invalid user ID in token")
 		}
-		return userID, claims.Role, nil
+		return userID, claims.Role, claims.UserName, nil
 	}
 
-	return 0, "", errors.New("invalid token")
+	return 0, "", "", errors.New("invalid token")
 }

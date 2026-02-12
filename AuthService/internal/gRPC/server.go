@@ -72,14 +72,15 @@ func (s *Server) ValidateToken(ctx context.Context, req *gen.ValidateTokenReques
 		return nil, status.Errorf(codes.InvalidArgument, "access_token is required")
 	}
 
-	userID, role, err := s.authService.ParseToken(req.GetAccessToken())
+	userID, role, userName, err := s.authService.ParseToken(req.GetAccessToken())
 	if err != nil {
 		return &gen.ValidateTokenResponse{Valid: false}, errors.New("can't parse token")
 	}
 
 	return &gen.ValidateTokenResponse{
-		Valid:  true,
-		UserId: strconv.Itoa(userID),
-		Role:   role,
+		Valid:    true,
+		UserId:   strconv.Itoa(userID),
+		Role:     role,
+		UserName: userName,
 	}, nil
 }

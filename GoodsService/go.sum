@@ -42,6 +42,8 @@ github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnr
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260208215256-e3122c72dfad h1:n1lwfdpNkXE10JeEimhjQmRLDfdogac8691PwALn/WQ=
 github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260208215256-e3122c72dfad/go.mod h1:08Ez0uf/NN2wp1cnHNWAdNu+80g3kCGIUybS5tFc1TQ=
+github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260211200106-9daf5332b469 h1:al4Vi63MKTP3RAa3T34lR8KYaN/cI3M4ILP++GGjO08=
+github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260211200106-9daf5332b469/go.mod h1:08Ez0uf/NN2wp1cnHNWAdNu+80g3kCGIUybS5tFc1TQ=
 github.com/klauspost/compress v1.16.7 h1:2mk3MPGNzKyxErAw8YaohYh69+pa4sIQSC0fPGCFR9I=
 github.com/klauspost/compress v1.16.7/go.mod h1:ntbaceVETuRiXiv4DpjP66DpAtAGkEQskQzEyD//IeE=
 github.com/klauspost/cpuid/v2 v2.3.0 h1:S4CRMLnYUhGeDFDqkGriYKdfoFlDnMtqTiI/sFzhA9Y=

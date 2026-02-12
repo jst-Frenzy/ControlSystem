@@ -4,8 +4,9 @@ go 1.24.1
 
 require (
 	github.com/gin-gonic/gin v1.11.0
-	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260208215256-e3122c72dfad
+	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260211200106-9daf5332b469
 	github.com/sirupsen/logrus v1.9.4
+	go.mongodb.org/mongo-driver v1.17.9
 	google.golang.org/grpc v1.78.0
 )
 
@@ -38,7 +39,6 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
-	go.mongodb.org/mongo-driver v1.17.9 // indirect
 	go.uber.org/mock v0.5.0 // indirect
 	golang.org/x/arch v0.20.0 // indirect
 	golang.org/x/crypto v0.44.0 // indirect

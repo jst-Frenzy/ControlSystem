@@ -14,8 +14,11 @@ type GoodsMongoRepo interface {
 	GetQuantity(string) (int, error)
 
 	CreateItem(Item) (string, error)
-	DeleteItem(string) error
+	DeleteItem(string, string) error
 	UpdateItem(Item) (Item, error)
+
+	GetSellerIDByUserID(int) (string, error)
+	CreateSeller(int, string) (string, error)
 }
 
 type goodsMongoRepo struct {
@@ -57,14 +60,20 @@ func (r *goodsMongoRepo) CreateItem(item Item) (string, error) {
 	return res.InsertedID.(string), err
 }
 
-func (r *goodsMongoRepo) DeleteItem(itemID string) error {
-	filter := bson.D{{"_id", itemID}}
-	_, err := r.itemCollection.DeleteOne(r.ctx, filter)
+func (r *goodsMongoRepo) DeleteItem(itemID string, sellerID string) error {
+	filter := bson.D{{"_id", itemID}, {"seller_id", sellerID}}
+	result, err := r.itemCollection.DeleteOne(r.ctx, filter)
 	if err != nil {
 		return err
 	}
+
+	if result.DeletedCount == 0 {
+		return errors.New("item not found")
+	}
+
 	return nil
 }
+
 func (r *goodsMongoRepo) UpdateItem(item Item) (Item, error) {
 	filter := bson.D{{"_id", item.ID}}
 	res := r.itemCollection.FindOneAndReplace(r.ctx, filter, item, options.FindOneAndReplace().SetReturnDocument(options.After))
@@ -95,4 +104,31 @@ func (r *goodsMongoRepo) GetQuantity(itemID string) (int, error) {
 	}
 
 	return i.Quantity, nil
+}
+
+func (r *goodsMongoRepo) GetSellerIDByUserID(id int) (string, error) {
+	filter := bson.D{{"user_id", id}}
+	res := r.sellerCollection.FindOne(r.ctx, filter)
+
+	var s Seller
+	if err := res.Decode(&s); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return "", errors.New("item not found")
+		}
+		return "", err
+	}
+	return s.Id, nil
+}
+
+func (r *goodsMongoRepo) CreateSeller(userID int, name string) (string, error) {
+	var s = Seller{
+		UserID: userID,
+		Name:   name,
+	}
+	res, err := r.sellerCollection.InsertOne(r.ctx, s)
+	if err != nil {
+		return "", err
+	}
+
+	return res.InsertedID.(string), nil
 }
