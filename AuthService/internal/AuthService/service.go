@@ -120,6 +120,7 @@ func (s *authService) ChangeRole(user UserSignIn, id int, newRole string) error 
 	if user.Email == "admin" && user.Password == "admin" {
 		return s.repoPostgres.ChangeRole(id, newRole)
 	}
+
 	return errors.New("not enough rights")
 }
 

@@ -1,5 +1,5 @@
 create table users(
-    res serial primary key,
+    id serial primary key,
     user_name varchar(255) not null,
     email varchar(255) unique not null,
     password_hash varchar(255) not null,
@@ -10,8 +10,8 @@ create table users(
 );
 
 create table refresh_tokens(
-    res serial not null,
-    user_id integer not null references users(res) on delete cascade,
+    id serial not null,
+    user_id integer not null references users(id) on delete cascade,
     token_hash varchar(255) not null,
     created_at timestamp default now(),
     updated_at timestamp default now(),

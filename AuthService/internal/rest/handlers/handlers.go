@@ -76,9 +76,9 @@ func (h *AuthHandler) Refresh(ctx *gin.Context) {
 func (h *AuthHandler) ChangeRole(ctx *gin.Context) {
 	nameHandler := "ChangeRole"
 	type data struct {
-		user    AuthService.UserSignIn
-		newRole string
-		id      int
+		User    AuthService.UserSignIn `json:"user"`
+		NewRole string                 `json:"newRole"`
+		Id      int                    `json:"id"`
 	}
 	var d data
 	if err := ctx.ShouldBind(&d); err != nil {
@@ -86,7 +86,7 @@ func (h *AuthHandler) ChangeRole(ctx *gin.Context) {
 		return
 	}
 
-	err := h.service.ChangeRole(d.user, d.id, d.newRole)
+	err := h.service.ChangeRole(d.User, d.Id, d.NewRole)
 	if err != nil {
 		if errors.Is(err, errors.New("not enough rights")) {
 			newErrorResponse(ctx, nameHandler, http.StatusBadRequest, err.Error())

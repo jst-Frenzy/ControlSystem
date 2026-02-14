@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/GoodService"
 	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/gRPC"
@@ -39,7 +40,7 @@ func (h *GoodsHandlers) GetGoods(ctx *gin.Context) {
 func (h *GoodsHandlers) AddItem(ctx *gin.Context) {
 	nameHandler := "AddItem"
 	role := ctx.MustGet("userRole")
-
+	fmt.Println(role)
 	if !(role == "seller") {
 		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "not enough rights")
 		return

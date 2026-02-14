@@ -9,6 +9,8 @@ services:
     depends_on:
       auth-service:
         condition: service_started
+      goods-service:
+        condition: service_started
     networks:
       - app-network
 
@@ -31,6 +33,23 @@ services:
     networks:
       - app-network
 
+  goods-service:
+    build:
+      context: ./GoodsService
+      dockerfile: Dockerfile
+    container_name: goods-service
+    env_file:
+      - GoodsService/.env
+    environment:
+      - GIN_MODE=release
+    ports:
+      - "8081:8081"
+    depends_on:
+      goods-db:
+        condition: service_healthy
+    networks:
+      - app-network
+
   auth-db:
     image: postgres:15-alpine
     container_name: auth-db
@@ -46,6 +65,22 @@ services:
       - app-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  goods-db:
+    image: mongo:7.0
+    container_name: goods-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+    command: ["mongod", "--quiet", "--logpath", "/dev/null"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok", "--quiet"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -73,3 +108,4 @@ networks:
 volumes:
   auth-db-data:
   redis-data:
+  mongo-data:

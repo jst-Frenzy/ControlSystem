@@ -1,4 +1,4 @@
-package app
+package main
 
 import (
 	"github.com/gin-gonic/gin"
@@ -37,7 +37,7 @@ func main() {
 		}
 	}
 
-	if errRun := router.Run(":8080"); errRun != nil {
+	if errRun := router.Run(":8081"); errRun != nil {
 		logrus.WithError(errRun).Fatalf("REST server failed")
 	}
 }

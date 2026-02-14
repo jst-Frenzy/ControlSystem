@@ -8,12 +8,11 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o auth-service ./cmd/app/main.go
+RUN go build -o goods-service ./cmd/app/main.go
 
 FROM alpine:latest
 WORKDIR /app
 
-COPY --from=builder /app/auth-service .
-COPY --from=builder /app/migrations ./migrations/
+COPY --from=builder /app/goods-service .
 
-CMD ["./auth-service"]
+CMD ["./goods-service"]

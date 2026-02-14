@@ -47,6 +47,7 @@ func main() {
 			auth.POST("/signup", authHandler.SignUp)
 			auth.POST("/signin", authHandler.SignIn)
 			auth.POST("/refresh", authHandler.Refresh)
+			auth.POST("/changeRole", authHandler.ChangeRole)
 		}
 	}
 
