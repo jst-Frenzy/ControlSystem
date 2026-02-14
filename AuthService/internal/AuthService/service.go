@@ -16,7 +16,7 @@ type AuthService interface {
 	SignIn(u UserSignIn) (Tokens, error)
 	RefreshTokens(refreshToken string) (string, error)
 	ParseToken(accessToken string) (int, string, string, error)
-	ChangeRole(UserSignIn, int, string) error
+	ChangeRole(UserSignIn, int, string) (string, error)
 }
 
 type authService struct {
@@ -116,12 +116,19 @@ func (s *authService) RefreshTokens(refreshToken string) (string, error) {
 	return accessToken, nil
 }
 
-func (s *authService) ChangeRole(user UserSignIn, id int, newRole string) error {
+func (s *authService) ChangeRole(user UserSignIn, id int, newRole string) (string, error) {
 	if user.Email == "admin" && user.Password == "admin" {
-		return s.repoPostgres.ChangeRole(id, newRole)
+		u, err := s.repoPostgres.ChangeRole(id, newRole)
+		if err != nil {
+			return "", err
+		}
+		accessToken, err := s.tokenManager.NewJWT(u, accessTTL)
+		if err != nil {
+			return "", err
+		}
+		return accessToken, nil
 	}
-
-	return errors.New("not enough rights")
+	return "", errors.New("not enough rights")
 }
 
 func (s *authService) generateTokensPair(user User) (Tokens, error) {

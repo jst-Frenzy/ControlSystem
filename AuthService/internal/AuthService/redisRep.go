@@ -14,6 +14,7 @@ type AuthRedisRepo interface {
 	GetUserWithEmail(string) (User, error)
 	AddUserWithRefreshToken(User, string) error
 	GetUserWithRefreshToken(string) (User, error)
+	EditRoleWithRefreshToken(string, string) error
 }
 
 type authRedisRepo struct {
@@ -28,7 +29,7 @@ func NewAuthRedisRepo(db *redis.Client) AuthRedisRepo {
 	}
 }
 
-func (ar *authRedisRepo) AddUserWithEmail(u User) error {
+func (r *authRedisRepo) AddUserWithEmail(u User) error {
 	key := u.Email
 
 	jsonData, err := json.Marshal(u)
@@ -36,10 +37,10 @@ func (ar *authRedisRepo) AddUserWithEmail(u User) error {
 		return err
 	}
 
-	return ar.db.Set(ar.ctx, key, jsonData, userEmailTTL).Err()
+	return r.db.Set(r.ctx, key, jsonData, userEmailTTL).Err()
 }
 
-func (ar *authRedisRepo) AddUserWithRefreshToken(u User, refreshTokenHash string) error {
+func (r *authRedisRepo) AddUserWithRefreshToken(u User, refreshTokenHash string) error {
 	key := refreshTokenHash
 
 	jsonData, err := json.Marshal(u)
@@ -47,12 +48,12 @@ func (ar *authRedisRepo) AddUserWithRefreshToken(u User, refreshTokenHash string
 		return err
 	}
 
-	return ar.db.Set(ar.ctx, key, jsonData, userRefreshTokenTTL).Err()
+	return r.db.Set(r.ctx, key, jsonData, userRefreshTokenTTL).Err()
 }
 
-func (ar *authRedisRepo) GetUserWithEmail(email string) (User, error) {
+func (r *authRedisRepo) GetUserWithEmail(email string) (User, error) {
 	var user User
-	jsonData, err := ar.db.Get(ar.ctx, email).Result()
+	jsonData, err := r.db.Get(r.ctx, email).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return user, errors.New("user not found in cache")
@@ -67,9 +68,9 @@ func (ar *authRedisRepo) GetUserWithEmail(email string) (User, error) {
 	return user, nil
 }
 
-func (ar *authRedisRepo) GetUserWithRefreshToken(refreshTokenHash string) (User, error) {
+func (r *authRedisRepo) GetUserWithRefreshToken(refreshTokenHash string) (User, error) {
 	var user User
-	jsonData, err := ar.db.Get(ar.ctx, refreshTokenHash).Result()
+	jsonData, err := r.db.Get(r.ctx, refreshTokenHash).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return user, errors.New("user not found in cache")
@@ -82,4 +83,19 @@ func (ar *authRedisRepo) GetUserWithRefreshToken(refreshTokenHash string) (User,
 	}
 
 	return user, nil
+}
+
+func (r *authRedisRepo) EditRoleWithRefreshToken(refreshTokenHash, newRole string) error {
+	u, err := r.GetUserWithRefreshToken(refreshTokenHash)
+	if err != nil {
+		return err
+	}
+	u.Role = newRole
+
+	jsonUser, err := json.Marshal(u)
+	if err != nil {
+		return err
+	}
+
+	return r.db.Set(r.ctx, refreshTokenHash, jsonUser, userRefreshTokenTTL).Err()
 }

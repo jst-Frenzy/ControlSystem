@@ -86,7 +86,7 @@ func (h *AuthHandler) ChangeRole(ctx *gin.Context) {
 		return
 	}
 
-	err := h.service.ChangeRole(d.User, d.Id, d.NewRole)
+	accessToken, err := h.service.ChangeRole(d.User, d.Id, d.NewRole)
 	if err != nil {
 		if errors.Is(err, errors.New("not enough rights")) {
 			newErrorResponse(ctx, nameHandler, http.StatusBadRequest, err.Error())
@@ -95,5 +95,7 @@ func (h *AuthHandler) ChangeRole(ctx *gin.Context) {
 		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{})
+	ctx.JSON(http.StatusOK, gin.H{
+		"accessToken": accessToken,
+	})
 }

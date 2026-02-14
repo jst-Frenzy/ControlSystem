@@ -12,7 +12,7 @@ type AuthPostgresRepo interface {
 	SaveRefreshToken(RefreshToken) error
 	GetUserByRefreshToken(string) (User, error)
 
-	ChangeRole(int, string) error
+	ChangeRole(int, string) (User, error)
 }
 
 type authPostgresRepo struct {
@@ -55,6 +55,13 @@ func (r *authPostgresRepo) GetUserByRefreshToken(refreshTokenHash string) (User,
 	return user, nil
 }
 
-func (r *authPostgresRepo) ChangeRole(id int, newRole string) error {
-	return r.db.Table("users").Where("id = ?", id).Update("role", newRole).Error
+func (r *authPostgresRepo) ChangeRole(id int, newRole string) (User, error) {
+	var u User
+	if err := r.db.Table("users").Where("id = ?", id).Update("role", newRole).Error; err != nil {
+		return User{}, err
+	}
+	if err := r.db.Table("users").Where("id = ?", id).First(&u).Error; err != nil {
+		return User{}, err
+	}
+	return u, nil
 }
