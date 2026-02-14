@@ -1,6 +1,9 @@
 package GoodService
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type GoodService interface {
 	GetGoods() ([]Item, error)
@@ -26,9 +29,13 @@ func (s *goodService) AddItem(i Item, seller UserCtx) (string, error) {
 	var sellerID string
 	var err error
 	sellerID, err = s.repo.GetSellerIDByUserID(seller.ID)
-	if err.Error() == "item not found" {
-		sellerID, err = s.repo.CreateSeller(seller.ID, seller.Name)
-		if err != nil {
+	if err != nil {
+		if err.Error() == "item not found" {
+			sellerID, err = s.repo.CreateSeller(seller.ID, seller.Name)
+			if err != nil {
+				return "", err
+			}
+		} else {
 			return "", err
 		}
 	}
@@ -38,6 +45,7 @@ func (s *goodService) AddItem(i Item, seller UserCtx) (string, error) {
 
 func (s *goodService) DeleteItem(itemID string, userID int) error {
 	sellerID, err := s.repo.GetSellerIDByUserID(userID)
+	fmt.Println(itemID, sellerID)
 	if err != nil {
 		return err
 	}
@@ -49,8 +57,15 @@ func (s *goodService) UpdateItem(i Item, userID int) (Item, error) {
 	if err != nil {
 		return Item{}, err
 	}
-	if i.SellerID != sellerID {
+
+	oldItem, err := s.repo.GetItemByID(i.ID)
+	if err != nil {
+		return Item{}, err
+	}
+
+	if oldItem.SellerID != sellerID {
 		return Item{}, errors.New("it's not your item")
 	}
+	i.SellerID = sellerID
 	return s.repo.UpdateItem(i)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -18,6 +19,7 @@ type GoodsMongoRepo interface {
 	UpdateItem(Item) (Item, error)
 
 	GetSellerIDByUserID(int) (string, error)
+	GetItemByID(string) (Item, error)
 	CreateSeller(int, string) (string, error)
 }
 
@@ -57,11 +59,21 @@ func (r *goodsMongoRepo) CreateItem(item Item) (string, error) {
 		return "", err
 	}
 
-	return res.InsertedID.(string), err
+	id, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return "", errors.New("cant convert id to ObjectID")
+	}
+
+	return id.Hex(), nil
 }
 
 func (r *goodsMongoRepo) DeleteItem(itemID string, sellerID string) error {
-	filter := bson.D{{"_id", itemID}, {"seller_id", sellerID}}
+	objectID, err := primitive.ObjectIDFromHex(itemID)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.D{{"_id", objectID}, {"seller_id", sellerID}}
 	result, err := r.itemCollection.DeleteOne(r.ctx, filter)
 	if err != nil {
 		return err
@@ -75,14 +87,26 @@ func (r *goodsMongoRepo) DeleteItem(itemID string, sellerID string) error {
 }
 
 func (r *goodsMongoRepo) UpdateItem(item Item) (Item, error) {
-	filter := bson.D{{"_id", item.ID}}
-	res := r.itemCollection.FindOneAndReplace(r.ctx, filter, item, options.FindOneAndReplace().SetReturnDocument(options.After))
+	objectID, err := primitive.ObjectIDFromHex(item.ID)
+	if err != nil {
+		return Item{}, err
+	}
+
+	filter := bson.D{{"_id", objectID}}
+	update := bson.D{
+		{"$set", bson.D{
+			{"name", item.Name},
+			{"description", item.Description},
+			{"quantity", item.Quantity},
+			{"seller_id", item.SellerID},
+		}},
+	}
+	res := r.itemCollection.FindOneAndUpdate(r.ctx, filter, update, options.FindOneAndUpdate().SetReturnDocument(options.After))
 
 	var newItem Item
-	err := res.Decode(&newItem)
-
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
+	errDecode := res.Decode(&newItem)
+	if errDecode != nil {
+		if errors.Is(errDecode, mongo.ErrNoDocuments) {
 			return Item{}, errors.New("item not found")
 		}
 		return Item{}, err
@@ -92,7 +116,12 @@ func (r *goodsMongoRepo) UpdateItem(item Item) (Item, error) {
 }
 
 func (r *goodsMongoRepo) GetQuantity(itemID string) (int, error) {
-	filter := bson.D{{"_id", itemID}}
+	objectID, err := primitive.ObjectIDFromHex(itemID)
+	if err != nil {
+		return 0, err
+	}
+
+	filter := bson.D{{"_id", objectID}}
 	res := r.itemCollection.FindOne(r.ctx, filter)
 
 	var i Item
@@ -130,5 +159,30 @@ func (r *goodsMongoRepo) CreateSeller(userID int, name string) (string, error) {
 		return "", err
 	}
 
-	return res.InsertedID.(string), nil
+	id, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return "", errors.New("cant convert id to ObjectID")
+	}
+
+	return id.Hex(), nil
+}
+
+func (r *goodsMongoRepo) GetItemByID(id string) (Item, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return Item{}, err
+	}
+
+	filter := bson.D{{"_id", objectID}}
+	res := r.itemCollection.FindOne(r.ctx, filter)
+
+	var i Item
+	if errDecode := res.Decode(&i); errDecode != nil {
+		if errors.Is(errDecode, mongo.ErrNoDocuments) {
+			return Item{}, errors.New("item not found")
+		}
+		return Item{}, errDecode
+	}
+
+	return i, nil
 }

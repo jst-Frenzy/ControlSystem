@@ -35,11 +35,11 @@ func (h *AuthHandler) UserIdentity(ctx *gin.Context) {
 		return
 	}
 
-	userID, role, _, err := h.service.ParseToken(headerParts[1])
+	info, err := h.service.ParseToken(headerParts[1])
 	if err != nil {
 		newErrorResponse(ctx, nameHandler, http.StatusUnauthorized, err.Error())
 		return
 	}
-	ctx.Set(userIDCtx, userID)
-	ctx.Set(userRoleCtx, role)
+	ctx.Set(userIDCtx, info.ID)
+	ctx.Set(userRoleCtx, info.Role)
 }

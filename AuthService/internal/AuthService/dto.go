@@ -35,3 +35,9 @@ type UserSignIn struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type InfoFromToken struct {
+	ID       int
+	Role     string
+	UserName string
+}

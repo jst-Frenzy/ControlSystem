@@ -78,10 +78,7 @@ func (h *GoodsHandlers) DeleteItem(ctx *gin.Context) {
 		return
 	}
 
-	itemID, ok := ctx.GetQuery("id")
-	if !ok {
-		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "no id for delete item")
-	}
+	itemID := ctx.Param("id")
 
 	userID := ctx.MustGet("userID").(int)
 
