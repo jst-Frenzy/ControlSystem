@@ -63,25 +63,21 @@ func (s *authService) SignUp(u UserSignUp) (int, error) {
 func (s *authService) SignIn(u UserSignIn) (Tokens, error) {
 	var user User
 	var err error
-	user, err = s.repoRedis.GetUserWithEmail(u.Email)
-	if err != nil {
+	if user, err = s.repoRedis.GetUserWithEmail(u.Email); err != nil {
 		logrus.Warn(err)
-
-		user, err = s.repoPostgres.GetUser(u.Email)
-		if err != nil {
+		if user, err = s.repoPostgres.GetUser(u.Email); err != nil {
 			return Tokens{}, err
 		}
-
-		go func() {
-			if errCache := s.repoRedis.AddUserWithEmail(user); errCache != nil {
-				logrus.Warn("can't save user to cache")
-			}
-		}()
 	}
 
 	if !s.checkPassword(u.Password, user.PasswordHash) {
 		return Tokens{}, errors.New("password is wrong")
 	}
+	go func() {
+		if errCache := s.repoRedis.AddUserWithEmail(user); errCache != nil {
+			logrus.Warn("can't save user to cache")
+		}
+	}()
 
 	return s.generateTokensPair(user)
 }

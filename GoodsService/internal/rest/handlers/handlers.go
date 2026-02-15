@@ -41,7 +41,7 @@ func (h *GoodsHandlers) AddItem(ctx *gin.Context) {
 	nameHandler := "AddItem"
 	role := ctx.MustGet("userRole")
 	fmt.Println(role)
-	if !(role == "seller") {
+	if role != "seller" {
 		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "not enough rights")
 		return
 	}

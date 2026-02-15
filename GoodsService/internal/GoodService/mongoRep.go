@@ -73,7 +73,9 @@ func (r *goodsMongoRepo) DeleteItem(itemID string, sellerID string) error {
 		return err
 	}
 
-	filter := bson.D{{"_id", objectID}, {"seller_id", sellerID}}
+	filter := bson.D{
+		{Key: "_id", Value: objectID},
+		{Key: "seller_id", Value: sellerID}}
 	result, err := r.itemCollection.DeleteOne(r.ctx, filter)
 	if err != nil {
 		return err
@@ -92,13 +94,13 @@ func (r *goodsMongoRepo) UpdateItem(item Item) (Item, error) {
 		return Item{}, err
 	}
 
-	filter := bson.D{{"_id", objectID}}
+	filter := bson.D{{Key: "_id", Value: objectID}}
 	update := bson.D{
-		{"$set", bson.D{
-			{"name", item.Name},
-			{"description", item.Description},
-			{"quantity", item.Quantity},
-			{"seller_id", item.SellerID},
+		{Key: "$set", Value: bson.D{
+			{Key: "name", Value: item.Name},
+			{Key: "description", Value: item.Description},
+			{Key: "quantity", Value: item.Quantity},
+			{Key: "seller_id", Value: item.SellerID},
 		}},
 	}
 	res := r.itemCollection.FindOneAndUpdate(r.ctx, filter, update, options.FindOneAndUpdate().SetReturnDocument(options.After))
@@ -121,22 +123,22 @@ func (r *goodsMongoRepo) GetQuantity(itemID string) (int, error) {
 		return 0, err
 	}
 
-	filter := bson.D{{"_id", objectID}}
+	filter := bson.D{{Key: "_id", Value: objectID}}
 	res := r.itemCollection.FindOne(r.ctx, filter)
 
 	var i Item
-	if err := res.Decode(&i); err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
+	if errDecode := res.Decode(&i); errDecode != nil {
+		if errors.Is(errDecode, mongo.ErrNoDocuments) {
 			return 0, errors.New("item not found")
 		}
-		return 0, err
+		return 0, errDecode
 	}
 
 	return i.Quantity, nil
 }
 
 func (r *goodsMongoRepo) GetSellerIDByUserID(id int) (string, error) {
-	filter := bson.D{{"user_id", id}}
+	filter := bson.D{{Key: "user_id", Value: id}}
 	res := r.sellerCollection.FindOne(r.ctx, filter)
 
 	var s Seller
@@ -173,7 +175,7 @@ func (r *goodsMongoRepo) GetItemByID(id string) (Item, error) {
 		return Item{}, err
 	}
 
-	filter := bson.D{{"_id", objectID}}
+	filter := bson.D{{Key: "_id", Value: objectID}}
 	res := r.itemCollection.FindOne(r.ctx, filter)
 
 	var i Item

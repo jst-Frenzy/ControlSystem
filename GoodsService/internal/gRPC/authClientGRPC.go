@@ -2,7 +2,6 @@ package gRPC
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen"
 	"google.golang.org/grpc"
@@ -18,7 +17,7 @@ type AuthClient struct {
 func NewAuthClient(addr string) (*AuthClient, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to connect to auth service: %v", err))
+		return nil, fmt.Errorf("failed to connect to auth service: %w", err)
 	}
 
 	return &AuthClient{
