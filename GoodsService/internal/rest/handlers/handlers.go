@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/GoodService"
 	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/gRPC"
@@ -10,10 +9,10 @@ import (
 
 type GoodsHandlers struct {
 	serv       GoodService.GoodService
-	authClient *gRPC.AuthClient
+	authClient gRPC.AuthClient
 }
 
-func NewGoodsHandlers(serv GoodService.GoodService, authClient *gRPC.AuthClient) *GoodsHandlers {
+func NewGoodsHandlers(serv GoodService.GoodService, authClient gRPC.AuthClient) *GoodsHandlers {
 	return &GoodsHandlers{
 		serv:       serv,
 		authClient: authClient,
@@ -40,7 +39,7 @@ func (h *GoodsHandlers) GetGoods(ctx *gin.Context) {
 func (h *GoodsHandlers) AddItem(ctx *gin.Context) {
 	nameHandler := "AddItem"
 	role := ctx.MustGet("userRole")
-	fmt.Println(role)
+
 	if role != "seller" {
 		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "not enough rights")
 		return
@@ -48,7 +47,7 @@ func (h *GoodsHandlers) AddItem(ctx *gin.Context) {
 
 	var i GoodService.Item
 	if err := ctx.ShouldBind(&i); err != nil {
-		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, err.Error())
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "invalid input body")
 		return
 	}
 
@@ -96,13 +95,13 @@ func (h *GoodsHandlers) UpdateItem(ctx *gin.Context) {
 	role := ctx.MustGet("userRole")
 
 	if role != "seller" {
-		newErrorResponse(ctx, nameHandler, http.StatusUnauthorized, "not enough rights")
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "not enough rights")
 		return
 	}
 
 	var i GoodService.Item
 	if err := ctx.ShouldBind(&i); err != nil {
-		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, err.Error())
+		newErrorResponse(ctx, nameHandler, http.StatusBadRequest, "invalid input body")
 		return
 	}
 

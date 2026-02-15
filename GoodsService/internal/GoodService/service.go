@@ -2,8 +2,9 @@ package GoodService
 
 import (
 	"errors"
-	"fmt"
 )
+
+//go:generate mockgen -source=service.go -destination=../mocks/mockServ.go
 
 type GoodService interface {
 	GetGoods() ([]Item, error)
@@ -45,7 +46,7 @@ func (s *goodService) AddItem(i Item, seller UserCtx) (string, error) {
 
 func (s *goodService) DeleteItem(itemID string, userID int) error {
 	sellerID, err := s.repo.GetSellerIDByUserID(userID)
-	fmt.Println(itemID, sellerID)
+
 	if err != nil {
 		return err
 	}

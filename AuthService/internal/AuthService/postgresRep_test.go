@@ -3,7 +3,6 @@ package AuthService
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
@@ -33,11 +32,11 @@ func TestPostgresRep_CreateUser(t *testing.T) {
 		logrus.Fatal(err)
 	}
 
-	r := AuthService.NewAuthPostgresRepo(gormDB)
+	r := NewAuthPostgresRepo(gormDB)
 
 	type args struct {
 		listID int
-		item   AuthService.User
+		item   User
 	}
 
 	type mockBehavior func(args args, id int)
@@ -46,14 +45,14 @@ func TestPostgresRep_CreateUser(t *testing.T) {
 		name         string
 		mockBehavior mockBehavior
 		args         args
-		expectedUser AuthService.User
+		expectedUser User
 		wantErr      bool
 	}{
 		{
 			name: "OK",
 			args: args{
 				listID: 1,
-				item: AuthService.User{
+				item: User{
 					UserName:     "test",
 					Email:        "test@test.com",
 					PasswordHash: "qwerty",
@@ -62,7 +61,7 @@ func TestPostgresRep_CreateUser(t *testing.T) {
 					UpdatedAt:    fixedTime,
 				},
 			},
-			expectedUser: AuthService.User{
+			expectedUser: User{
 				ID:           2,
 				UserName:     "test",
 				Email:        "test@test.com",
@@ -87,7 +86,7 @@ func TestPostgresRep_CreateUser(t *testing.T) {
 			name: "Empty Fields",
 			args: args{
 				listID: 1,
-				item: AuthService.User{
+				item: User{
 					UserName:     "",
 					Email:        "",
 					PasswordHash: "",
@@ -142,11 +141,11 @@ func TestPostgresRep_SaveRefreshToken(t *testing.T) {
 		logrus.Fatal(errGorm)
 	}
 
-	r := AuthService.NewAuthPostgresRepo(gormDB)
+	r := NewAuthPostgresRepo(gormDB)
 
 	type args struct {
 		listID int
-		item   AuthService.RefreshToken
+		item   RefreshToken
 	}
 
 	type mockBehavior func(args args, id int)
@@ -163,7 +162,7 @@ func TestPostgresRep_SaveRefreshToken(t *testing.T) {
 			id:   2,
 			args: args{
 				listID: 1,
-				item: AuthService.RefreshToken{
+				item: RefreshToken{
 					UserID:    1,
 					TokenHash: "qwerty",
 					ExpiresAt: time.Now().Add(5 * time.Second),
@@ -183,7 +182,7 @@ func TestPostgresRep_SaveRefreshToken(t *testing.T) {
 			id:   2,
 			args: args{
 				listID: 1,
-				item:   AuthService.RefreshToken{},
+				item:   RefreshToken{},
 			},
 			mockBehavior: func(args args, id int) {
 				mock.ExpectBegin()
@@ -232,7 +231,7 @@ func TestPostgresRep_GetUser(t *testing.T) {
 		logrus.Fatal(errGorm)
 	}
 
-	r := AuthService.NewAuthPostgresRepo(gormDB)
+	r := NewAuthPostgresRepo(gormDB)
 
 	type args struct {
 		userEmail string
@@ -242,7 +241,7 @@ func TestPostgresRep_GetUser(t *testing.T) {
 		name    string
 		mock    func()
 		input   args
-		want    AuthService.User
+		want    User
 		wantErr bool
 	}{
 		{
@@ -257,7 +256,7 @@ func TestPostgresRep_GetUser(t *testing.T) {
 			input: args{
 				userEmail: "test@test.com",
 			},
-			want: AuthService.User{
+			want: User{
 				ID:           1,
 				UserName:     "test",
 				Email:        "test@test.com",
@@ -318,7 +317,7 @@ func TestPostgresRep_GetUserByRefreshToken(t *testing.T) {
 		logrus.Fatal(errGorm)
 	}
 
-	r := AuthService.NewAuthPostgresRepo(gormDB)
+	r := NewAuthPostgresRepo(gormDB)
 
 	type args struct {
 		refreshToken string
@@ -328,7 +327,7 @@ func TestPostgresRep_GetUserByRefreshToken(t *testing.T) {
 		name    string
 		mock    func()
 		input   args
-		want    AuthService.User
+		want    User
 		wantErr bool
 	}{
 		{
@@ -343,7 +342,7 @@ func TestPostgresRep_GetUserByRefreshToken(t *testing.T) {
 			input: args{
 				refreshToken: "refreshToken",
 			},
-			want: AuthService.User{
+			want: User{
 				ID:           1,
 				UserName:     "test",
 				Email:        "test@test.com",

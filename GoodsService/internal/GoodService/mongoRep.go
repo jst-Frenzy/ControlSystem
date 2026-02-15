@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+//go:generate mockgen -source=mongoRep.go -destination=../mocks/mockMongo.go
+
 type GoodsMongoRepo interface {
 	GetGoods() ([]Item, error)
 

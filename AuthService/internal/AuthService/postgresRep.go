@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//go:generate mockgen -source=postgresRep.go -destination=mocks/mockPostgres.go
+//go:generate mockgen -source=postgresRep.go -destination=../mocks/mockPostgres.go
 
 type AuthPostgresRepo interface {
 	GetUser(string) (User, error)

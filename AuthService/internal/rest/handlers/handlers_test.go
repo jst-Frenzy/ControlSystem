@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
 	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
-	mock_AuthService "github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService/mocks"
+	mock_AuthService "github.com/jst-Frenzy/ControlSystem/AuthService/internal/mocks"
 	"net/http/httptest"
 	"testing"
 )

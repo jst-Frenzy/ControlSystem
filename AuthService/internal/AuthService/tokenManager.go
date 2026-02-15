@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-//go:generate mockgen -source=tokenManager.go -destination=mocks/mockManager.go
+//go:generate mockgen -source=tokenManager.go -destination=../mocks/mockManager.go
 
 type TokenManager interface {
 	NewJWT(user User, ttl time.Duration) (string, error)

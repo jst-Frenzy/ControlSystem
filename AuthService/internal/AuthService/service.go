@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//go:generate mockgen -source=service.go -destination=mocks/mockServ.go
+//go:generate mockgen -source=service.go -destination=../mocks/mockServ.go
 
 type AuthService interface {
 	SignUp(u UserSignUp) (int, error)

@@ -4,6 +4,8 @@ go 1.24.1
 
 require (
 	github.com/gin-gonic/gin v1.11.0
+	github.com/go-playground/assert/v2 v2.2.0
+	github.com/golang/mock v1.6.0
 	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260211200106-9daf5332b469
 	github.com/sirupsen/logrus v1.9.4
 	go.mongodb.org/mongo-driver v1.17.9

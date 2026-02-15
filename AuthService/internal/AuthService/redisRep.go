@@ -7,7 +7,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-//go:generate mockgen -source=redisRep.go -destination=mocks/mockRedis.go
+//go:generate mockgen -source=redisRep.go -destination=../mocks/mockRedis.go
 
 type AuthRedisRepo interface {
 	AddUserWithEmail(User) error
