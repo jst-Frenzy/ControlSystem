@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//go:generate mockgen -source=authClientGRPC.go -destination=../mocks/MockAuthClient.go -package=mock_GoodService
+//go:generate mockgen -source=authClientGRPC.go -destination=../mocks/MockAuthClient.go -package=mocks
 
 type AuthClient interface {
 	ValidateToken(ctx context.Context, token string) (*gen.ValidateTokenResponse, error)

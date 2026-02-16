@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-//go:generate mockgen -source=service.go -destination=../mocks/mockServ.go
+//go:generate mockgen -source=service.go -destination=../mocks/mockServ.go -package=mocks
 
 type GoodService interface {
 	GetGoods() ([]Item, error)
@@ -15,10 +15,10 @@ type GoodService interface {
 }
 
 type goodService struct {
-	repo GoodsMongoRepo
+	repo GoodsMongoRep
 }
 
-func NewGoodService(repo GoodsMongoRepo) GoodService {
+func NewGoodService(repo GoodsMongoRep) GoodService {
 	return &goodService{repo: repo}
 }
 
@@ -31,10 +31,10 @@ func (s *goodService) AddItem(i Item, seller UserCtx) (string, error) {
 	var err error
 	sellerID, err = s.repo.GetSellerIDByUserID(seller.ID)
 	if err != nil {
-		if err.Error() == "item not found" {
+		if err.Error() == "seller not found" {
 			sellerID, err = s.repo.CreateSeller(seller.ID, seller.Name)
 			if err != nil {
-				return "", err
+				return "", errors.New("error create seller")
 			}
 		} else {
 			return "", err

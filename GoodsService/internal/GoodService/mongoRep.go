@@ -9,9 +9,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-//go:generate mockgen -source=mongoRep.go -destination=../mocks/mockMongo.go
+//go:generate mockgen -source=mongoRep.go -destination=../mocks/mockMongo.go -package=mocks
 
-type GoodsMongoRepo interface {
+type GoodsMongoRep interface {
 	GetGoods() ([]Item, error)
 
 	GetQuantity(string) (int, error)
@@ -31,7 +31,7 @@ type goodsMongoRepo struct {
 	ctx              context.Context
 }
 
-func NewGoodsMongoRepo(client *mongo.Client) GoodsMongoRepo {
+func NewGoodsMongoRepo(client *mongo.Client) GoodsMongoRep {
 	db := client.Database("GoodsInfo")
 	return &goodsMongoRepo{
 		itemCollection:   db.Collection("goods"),

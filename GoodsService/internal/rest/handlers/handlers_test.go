@@ -7,13 +7,13 @@ import (
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
 	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/GoodService"
-	mock_GoodService "github.com/jst-Frenzy/ControlSystem/GoodsService/internal/mocks"
+	mock "github.com/jst-Frenzy/ControlSystem/GoodsService/internal/mocks"
 	"net/http/httptest"
 	"testing"
 )
 
 func TestHandler_addItem(t *testing.T) {
-	type mockBehavior func(s *mock_GoodService.MockGoodService, i GoodService.Item, u GoodService.UserCtx)
+	type mockBehavior func(s *mock.MockGoodService, i GoodService.Item, u GoodService.UserCtx)
 
 	testTable := []struct {
 		name                 string
@@ -39,7 +39,7 @@ func TestHandler_addItem(t *testing.T) {
 				ID:   1,
 				Name: "testName",
 			},
-			mockBehavior: func(s *mock_GoodService.MockGoodService, i GoodService.Item, u GoodService.UserCtx) {
+			mockBehavior: func(s *mock.MockGoodService, i GoodService.Item, u GoodService.UserCtx) {
 				s.EXPECT().AddItem(i, u).Return("itemID", nil)
 			},
 			userRole:             "seller",
@@ -50,7 +50,7 @@ func TestHandler_addItem(t *testing.T) {
 		},
 		{
 			name:                 "Incorrect Role",
-			mockBehavior:         func(s *mock_GoodService.MockGoodService, i GoodService.Item, u GoodService.UserCtx) {},
+			mockBehavior:         func(s *mock.MockGoodService, i GoodService.Item, u GoodService.UserCtx) {},
 			userRole:             "user",
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"Message":"not enough rights"}`,
@@ -58,7 +58,7 @@ func TestHandler_addItem(t *testing.T) {
 		{
 			name:                 "Empty Fields",
 			inputBody:            `{"name": "testName", "quantity": 1}`,
-			mockBehavior:         func(s *mock_GoodService.MockGoodService, i GoodService.Item, u GoodService.UserCtx) {},
+			mockBehavior:         func(s *mock.MockGoodService, i GoodService.Item, u GoodService.UserCtx) {},
 			userRole:             "seller",
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"Message":"invalid input body"}`,
@@ -75,7 +75,7 @@ func TestHandler_addItem(t *testing.T) {
 				ID:   1,
 				Name: "testName",
 			},
-			mockBehavior: func(s *mock_GoodService.MockGoodService, i GoodService.Item, u GoodService.UserCtx) {
+			mockBehavior: func(s *mock.MockGoodService, i GoodService.Item, u GoodService.UserCtx) {
 				s.EXPECT().AddItem(i, u).Return("", errors.New("service failure"))
 			},
 			userRole:             "seller",
@@ -91,8 +91,8 @@ func TestHandler_addItem(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			goodService := mock_GoodService.NewMockGoodService(c)
-			authClient := mock_GoodService.NewMockAuthClient(c)
+			goodService := mock.NewMockGoodService(c)
+			authClient := mock.NewMockAuthClient(c)
 			testCase.mockBehavior(goodService, testCase.inputItem, testCase.inputUserCtx)
 
 			handler := NewGoodsHandlers(goodService, authClient)
@@ -118,7 +118,7 @@ func TestHandler_addItem(t *testing.T) {
 }
 
 func TestHandler_getGoods(t *testing.T) {
-	type mockBehavior func(s *mock_GoodService.MockGoodService)
+	type mockBehavior func(s *mock.MockGoodService)
 	testTable := []struct {
 		name                 string
 		mockBehavior         mockBehavior
@@ -127,7 +127,7 @@ func TestHandler_getGoods(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			mockBehavior: func(s *mock_GoodService.MockGoodService) {
+			mockBehavior: func(s *mock.MockGoodService) {
 				s.EXPECT().GetGoods().Return([]GoodService.Item{
 					{
 						Name:        "apple",
@@ -144,7 +144,7 @@ func TestHandler_getGoods(t *testing.T) {
 		},
 		{
 			name: "Server Error",
-			mockBehavior: func(s *mock_GoodService.MockGoodService) {
+			mockBehavior: func(s *mock.MockGoodService) {
 				s.EXPECT().GetGoods().Return([]GoodService.Item{}, errors.New("service failure"))
 			},
 			expectedStatusCode:   500,
@@ -157,10 +157,10 @@ func TestHandler_getGoods(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			goodService := mock_GoodService.NewMockGoodService(c)
+			goodService := mock.NewMockGoodService(c)
 			testCase.mockBehavior(goodService)
 
-			authClient := mock_GoodService.NewMockAuthClient(c)
+			authClient := mock.NewMockAuthClient(c)
 
 			handler := NewGoodsHandlers(goodService, authClient)
 
@@ -180,7 +180,7 @@ func TestHandler_getGoods(t *testing.T) {
 }
 
 func TestHandler_deleteItem(t *testing.T) {
-	type mockBehavior func(s *mock_GoodService.MockGoodService, itemID string, userID int)
+	type mockBehavior func(s *mock.MockGoodService, itemID string, userID int)
 
 	testTable := []struct {
 		name                 string
@@ -198,7 +198,7 @@ func TestHandler_deleteItem(t *testing.T) {
 			userID:   1,
 			userName: "testName",
 			itemID:   "123",
-			mockBehavior: func(s *mock_GoodService.MockGoodService, itemID string, userID int) {
+			mockBehavior: func(s *mock.MockGoodService, itemID string, userID int) {
 				s.EXPECT().DeleteItem(itemID, userID).Return(nil)
 			},
 			expectedStatusCode:   204,
@@ -208,7 +208,7 @@ func TestHandler_deleteItem(t *testing.T) {
 			name:                 "Incorrect Role",
 			userRole:             "user",
 			itemID:               "123",
-			mockBehavior:         func(s *mock_GoodService.MockGoodService, itemID string, userID int) {},
+			mockBehavior:         func(s *mock.MockGoodService, itemID string, userID int) {},
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"Message":"not enough rights"}`,
 		},
@@ -218,7 +218,7 @@ func TestHandler_deleteItem(t *testing.T) {
 			userID:   1,
 			userName: "testName",
 			itemID:   "123",
-			mockBehavior: func(s *mock_GoodService.MockGoodService, itemID string, userID int) {
+			mockBehavior: func(s *mock.MockGoodService, itemID string, userID int) {
 				s.EXPECT().DeleteItem(itemID, userID).Return(errors.New("service failure"))
 			},
 			expectedStatusCode:   500,
@@ -230,10 +230,10 @@ func TestHandler_deleteItem(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			goodService := mock_GoodService.NewMockGoodService(c)
+			goodService := mock.NewMockGoodService(c)
 			testCase.mockBehavior(goodService, testCase.itemID, testCase.userID)
 
-			authClient := mock_GoodService.NewMockAuthClient(c)
+			authClient := mock.NewMockAuthClient(c)
 
 			handler := NewGoodsHandlers(goodService, authClient)
 
@@ -259,7 +259,7 @@ func TestHandler_deleteItem(t *testing.T) {
 }
 
 func TestHandler_updateItem(t *testing.T) {
-	type mockBehavior func(s *mock_GoodService.MockGoodService, i GoodService.Item, userID int)
+	type mockBehavior func(s *mock.MockGoodService, i GoodService.Item, userID int)
 
 	testTable := []struct {
 		name                 string
@@ -284,7 +284,7 @@ func TestHandler_updateItem(t *testing.T) {
 				Quantity:    10,
 			},
 			inputBody: `{"_id":"123","name":"apple","description":"new description","quantity": 10}`,
-			mockBehavior: func(s *mock_GoodService.MockGoodService, i GoodService.Item, userID int) {
+			mockBehavior: func(s *mock.MockGoodService, i GoodService.Item, userID int) {
 				s.EXPECT().UpdateItem(i, userID).Return(GoodService.Item{
 					ID:          "123",
 					Name:        "apple",
@@ -299,7 +299,7 @@ func TestHandler_updateItem(t *testing.T) {
 		{
 			name:                 "Incorrect role",
 			userRole:             "user",
-			mockBehavior:         func(s *mock_GoodService.MockGoodService, i GoodService.Item, userID int) {},
+			mockBehavior:         func(s *mock.MockGoodService, i GoodService.Item, userID int) {},
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"Message":"not enough rights"}`,
 		},
@@ -307,7 +307,7 @@ func TestHandler_updateItem(t *testing.T) {
 			name:                 "Empty Fields",
 			userRole:             "seller",
 			inputBody:            `{"_id":"123","name":"apple","quantity": 10}`,
-			mockBehavior:         func(s *mock_GoodService.MockGoodService, i GoodService.Item, userID int) {},
+			mockBehavior:         func(s *mock.MockGoodService, i GoodService.Item, userID int) {},
 			expectedStatusCode:   400,
 			expectedResponseBody: `{"Message":"invalid input body"}`,
 		},
@@ -321,7 +321,7 @@ func TestHandler_updateItem(t *testing.T) {
 				Quantity:    10,
 			},
 			inputBody: `{"_id":"123","name":"apple","description":"new description","quantity": 10}`,
-			mockBehavior: func(s *mock_GoodService.MockGoodService, i GoodService.Item, userID int) {
+			mockBehavior: func(s *mock.MockGoodService, i GoodService.Item, userID int) {
 				s.EXPECT().UpdateItem(i, userID).Return(GoodService.Item{}, errors.New("server failure"))
 			},
 			expectedStatusCode:   500,
@@ -334,10 +334,10 @@ func TestHandler_updateItem(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			goodService := mock_GoodService.NewMockGoodService(c)
+			goodService := mock.NewMockGoodService(c)
 			testCase.mockBehavior(goodService, testCase.inputItem, testCase.userID)
 
-			authClient := mock_GoodService.NewMockAuthClient(c)
+			authClient := mock.NewMockAuthClient(c)
 
 			handler := NewGoodsHandlers(goodService, authClient)
 
