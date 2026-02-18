@@ -58,21 +58,24 @@ func (r *goodsMongoRepo) CreateItem(item Item) (string, error) {
 	res, err := r.itemCollection.InsertOne(r.ctx, item)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("cant insert item")
 	}
 
-	id, ok := res.InsertedID.(primitive.ObjectID)
-	if !ok {
-		return "", errors.New("cant convert id to ObjectID")
+	if id, ok := res.InsertedID.(primitive.ObjectID); ok {
+		return id.Hex(), nil
 	}
 
-	return id.Hex(), nil
+	if id, ok := res.InsertedID.(string); ok {
+		return id, nil
+	}
+
+	return "", errors.New("cant insert item")
 }
 
 func (r *goodsMongoRepo) DeleteItem(itemID string, sellerID string) error {
 	objectID, err := primitive.ObjectIDFromHex(itemID)
 	if err != nil {
-		return err
+		return errors.New("can't parse itemId to objectId")
 	}
 
 	filter := bson.D{
@@ -93,7 +96,7 @@ func (r *goodsMongoRepo) DeleteItem(itemID string, sellerID string) error {
 func (r *goodsMongoRepo) UpdateItem(item Item) (Item, error) {
 	objectID, err := primitive.ObjectIDFromHex(item.ID)
 	if err != nil {
-		return Item{}, err
+		return Item{}, errors.New("can't parse itemId to objectId")
 	}
 
 	filter := bson.D{{Key: "_id", Value: objectID}}
@@ -122,7 +125,7 @@ func (r *goodsMongoRepo) UpdateItem(item Item) (Item, error) {
 func (r *goodsMongoRepo) GetQuantity(itemID string) (int, error) {
 	objectID, err := primitive.ObjectIDFromHex(itemID)
 	if err != nil {
-		return 0, err
+		return 0, errors.New("can't parse itemId to objectId")
 	}
 
 	filter := bson.D{{Key: "_id", Value: objectID}}
@@ -150,7 +153,7 @@ func (r *goodsMongoRepo) GetSellerIDByUserID(id int) (string, error) {
 		}
 		return "", err
 	}
-	return s.Id, nil
+	return s.ID, nil
 }
 
 func (r *goodsMongoRepo) CreateSeller(userID int, name string) (string, error) {
@@ -159,16 +162,20 @@ func (r *goodsMongoRepo) CreateSeller(userID int, name string) (string, error) {
 		Name:   name,
 	}
 	res, err := r.sellerCollection.InsertOne(r.ctx, s)
+
 	if err != nil {
 		return "", err
 	}
 
-	id, ok := res.InsertedID.(primitive.ObjectID)
-	if !ok {
-		return "", errors.New("cant convert id to ObjectID")
+	if id, ok := res.InsertedID.(primitive.ObjectID); ok {
+		return id.Hex(), nil
 	}
 
-	return id.Hex(), nil
+	if id, ok := res.InsertedID.(string); ok {
+		return id, nil
+	}
+
+	return "", errors.New("cant convert id to ObjectID or str")
 }
 
 func (r *goodsMongoRepo) GetItemByID(id string) (Item, error) {

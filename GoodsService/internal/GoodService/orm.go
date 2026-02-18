@@ -9,7 +9,7 @@ type Item struct {
 }
 
 type Seller struct {
-	Id     string `bson:"_id,omitempty"`
+	ID     string `bson:"_id,omitempty"`
 	UserID int    `bson:"user_id" binding:"required"`
 	Name   string `bson:"name" binding:"required"`
 }
