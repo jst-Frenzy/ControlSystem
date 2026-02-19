@@ -1,4 +1,4 @@
-package AuthService
+package AuthService_test
 
 import (
 	"crypto/sha256"
@@ -6,36 +6,37 @@ import (
 	"errors"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
 	mockauthservice "github.com/jst-Frenzy/ControlSystem/AuthService/internal/mocks"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
 )
 
 func TestService_signUp(t *testing.T) {
-	type mockBehavior func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, u User)
+	type mockBehavior func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, u AuthService.User)
 
 	testTable := []struct {
 		name          string
-		inputUser     UserSignUp
-		repoUser      User
+		inputUser     AuthService.UserSignUp
+		repoUser      AuthService.User
 		mockBehavior  mockBehavior
 		expectedID    int
 		expectedError error
 	}{
 		{
 			name: "OK",
-			inputUser: UserSignUp{
+			inputUser: AuthService.UserSignUp{
 				UserName: "test",
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
-			repoUser: User{
+			repoUser: AuthService.User{
 				UserName:     "test",
 				Email:        "test@test.com",
 				PasswordHash: "",
 			},
-			mockBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, u User) {
-				expectedUser := User{ID: 1, UserName: "test", Email: "test@test.com"}
+			mockBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, u AuthService.User) {
+				expectedUser := AuthService.User{ID: 1, UserName: "test", Email: "test@test.com"}
 				r.EXPECT().CreateUser(gomock.Any()).Return(expectedUser, nil)
 				redisMock.EXPECT().AddUserWithEmail(gomock.Any()).Return(nil).AnyTimes()
 			},
@@ -44,18 +45,18 @@ func TestService_signUp(t *testing.T) {
 		},
 		{
 			name: "DB Error",
-			inputUser: UserSignUp{
+			inputUser: AuthService.UserSignUp{
 				UserName: "test",
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
-			repoUser: User{
+			repoUser: AuthService.User{
 				UserName:     "test",
 				Email:        "test@test.com",
 				PasswordHash: "",
 			},
-			mockBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, u User) {
-				r.EXPECT().CreateUser(gomock.Any()).Return(User{}, errors.New("DB Failure"))
+			mockBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, u AuthService.User) {
+				r.EXPECT().CreateUser(gomock.Any()).Return(AuthService.User{}, errors.New("DB Failure"))
 			},
 			expectedID:    0,
 			expectedError: errors.New("DB Failure"),
@@ -75,7 +76,7 @@ func TestService_signUp(t *testing.T) {
 
 			testCase.mockBehavior(authPostgresRepo, authRedisRepo, testCase.repoUser)
 
-			service := NewAuthService(authPostgresRepo, authRedisRepo, tokenManager)
+			service := AuthService.NewAuthService(authPostgresRepo, authRedisRepo, tokenManager)
 
 			id, err := service.SignUp(testCase.inputUser)
 
@@ -91,16 +92,16 @@ func TestService_signIn(t *testing.T) {
 
 	testTable := []struct {
 		name           string
-		inputUser      UserSignIn
+		inputUser      AuthService.UserSignIn
 		inputEmail     string
 		repoBehavior   repoBehavior
 		tokenBehavior  tokenBehavior
-		expectedTokens Tokens
+		expectedTokens AuthService.Tokens
 		expectedError  error
 	}{
 		{
 			name: "OK",
-			inputUser: UserSignIn{
+			inputUser: AuthService.UserSignIn{
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
@@ -109,9 +110,9 @@ func TestService_signIn(t *testing.T) {
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, email string) {
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("qwerty"), bcrypt.DefaultCost)
 
-				redisMock.EXPECT().GetUserWithEmail(email).Return(User{}, errors.New("cache miss"))
+				redisMock.EXPECT().GetUserWithEmail(email).Return(AuthService.User{}, errors.New("cache miss"))
 				redisMock.EXPECT().AddUserWithRefreshToken(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
-				r.EXPECT().GetUser(email).Return(User{
+				r.EXPECT().GetUser(email).Return(AuthService.User{
 					ID:           1,
 					UserName:     "test",
 					Email:        "test@test.com",
@@ -126,7 +127,7 @@ func TestService_signIn(t *testing.T) {
 				t.EXPECT().NewJWT(gomock.Any(), gomock.Any()).Return("access_token", nil)
 				t.EXPECT().NewRefreshToken().Return("refresh_token", nil)
 			},
-			expectedTokens: Tokens{
+			expectedTokens: AuthService.Tokens{
 				AccessToken:  "access_token",
 				RefreshToken: "refresh_token",
 			},
@@ -134,22 +135,22 @@ func TestService_signIn(t *testing.T) {
 		},
 		{
 			name: "Fail Get User From Repo",
-			inputUser: UserSignIn{
+			inputUser: AuthService.UserSignIn{
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
 			inputEmail: "test@test.com",
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, email string) {
-				redisMock.EXPECT().GetUserWithEmail(email).Return(User{}, errors.New("cache miss"))
-				r.EXPECT().GetUser(email).Return(User{}, errors.New("fail Get User"))
+				redisMock.EXPECT().GetUserWithEmail(email).Return(AuthService.User{}, errors.New("cache miss"))
+				r.EXPECT().GetUser(email).Return(AuthService.User{}, errors.New("fail Get User"))
 			},
 			tokenBehavior:  func(t *mockauthservice.MockTokenManager) {},
-			expectedTokens: Tokens{},
+			expectedTokens: AuthService.Tokens{},
 			expectedError:  errors.New("fail Get User"),
 		},
 		{
 			name: "OK with cache hit",
-			inputUser: UserSignIn{
+			inputUser: AuthService.UserSignIn{
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
@@ -157,7 +158,7 @@ func TestService_signIn(t *testing.T) {
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, email string) {
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("qwerty"), bcrypt.DefaultCost)
 
-				redisMock.EXPECT().GetUserWithEmail(email).Return(User{
+				redisMock.EXPECT().GetUserWithEmail(email).Return(AuthService.User{
 					ID:           1,
 					UserName:     "test",
 					Email:        "test@test.com",
@@ -172,7 +173,7 @@ func TestService_signIn(t *testing.T) {
 				t.EXPECT().NewJWT(gomock.Any(), gomock.Any()).Return("access_token", nil)
 				t.EXPECT().NewRefreshToken().Return("refresh_token", nil)
 			},
-			expectedTokens: Tokens{
+			expectedTokens: AuthService.Tokens{
 				AccessToken:  "access_token",
 				RefreshToken: "refresh_token",
 			},
@@ -180,7 +181,7 @@ func TestService_signIn(t *testing.T) {
 		},
 		{
 			name: "Fail Generate JWT Tokens",
-			inputUser: UserSignIn{
+			inputUser: AuthService.UserSignIn{
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
@@ -189,9 +190,9 @@ func TestService_signIn(t *testing.T) {
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, email string) {
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("qwerty"), bcrypt.DefaultCost)
 
-				redisMock.EXPECT().GetUserWithEmail(email).Return(User{}, errors.New("cache miss"))
+				redisMock.EXPECT().GetUserWithEmail(email).Return(AuthService.User{}, errors.New("cache miss"))
 
-				r.EXPECT().GetUser(email).Return(User{
+				r.EXPECT().GetUser(email).Return(AuthService.User{
 					ID:           1,
 					UserName:     "test",
 					Email:        "test@test.com",
@@ -203,7 +204,7 @@ func TestService_signIn(t *testing.T) {
 			tokenBehavior: func(t *mockauthservice.MockTokenManager) {
 				t.EXPECT().NewJWT(gomock.Any(), gomock.Any()).Return("", errors.New("error generate JWT"))
 			},
-			expectedTokens: Tokens{
+			expectedTokens: AuthService.Tokens{
 				AccessToken:  "",
 				RefreshToken: "",
 			},
@@ -211,7 +212,7 @@ func TestService_signIn(t *testing.T) {
 		},
 		{
 			name: "Fail Generate Refresh Tokens",
-			inputUser: UserSignIn{
+			inputUser: AuthService.UserSignIn{
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
@@ -220,9 +221,9 @@ func TestService_signIn(t *testing.T) {
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, email string) {
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("qwerty"), bcrypt.DefaultCost)
 
-				redisMock.EXPECT().GetUserWithEmail(email).Return(User{}, errors.New("cache miss"))
+				redisMock.EXPECT().GetUserWithEmail(email).Return(AuthService.User{}, errors.New("cache miss"))
 
-				r.EXPECT().GetUser(email).Return(User{
+				r.EXPECT().GetUser(email).Return(AuthService.User{
 					ID:           1,
 					UserName:     "test",
 					Email:        "test@test.com",
@@ -235,7 +236,7 @@ func TestService_signIn(t *testing.T) {
 				t.EXPECT().NewJWT(gomock.Any(), gomock.Any()).Return("access_token", nil)
 				t.EXPECT().NewRefreshToken().Return("", errors.New("error generate Refresh"))
 			},
-			expectedTokens: Tokens{
+			expectedTokens: AuthService.Tokens{
 				AccessToken:  "",
 				RefreshToken: "",
 			},
@@ -243,7 +244,7 @@ func TestService_signIn(t *testing.T) {
 		},
 		{
 			name: "Fail Save Refresh Token",
-			inputUser: UserSignIn{
+			inputUser: AuthService.UserSignIn{
 				Email:    "test@test.com",
 				Password: "qwerty",
 			},
@@ -252,9 +253,9 @@ func TestService_signIn(t *testing.T) {
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, email string) {
 				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("qwerty"), bcrypt.DefaultCost)
 
-				redisMock.EXPECT().GetUserWithEmail(email).Return(User{}, errors.New("cache miss"))
+				redisMock.EXPECT().GetUserWithEmail(email).Return(AuthService.User{}, errors.New("cache miss"))
 
-				r.EXPECT().GetUser(email).Return(User{
+				r.EXPECT().GetUser(email).Return(AuthService.User{
 					ID:           1,
 					UserName:     "test",
 					Email:        "test@test.com",
@@ -269,7 +270,7 @@ func TestService_signIn(t *testing.T) {
 				t.EXPECT().NewJWT(gomock.Any(), gomock.Any()).Return("access_token", nil)
 				t.EXPECT().NewRefreshToken().Return("refresh_token", nil)
 			},
-			expectedTokens: Tokens{
+			expectedTokens: AuthService.Tokens{
 				AccessToken:  "",
 				RefreshToken: "",
 			},
@@ -291,7 +292,7 @@ func TestService_signIn(t *testing.T) {
 
 			testCase.repoBehavior(authPostgresRepo, authRedisRepo, testCase.inputEmail)
 
-			service := NewAuthService(authPostgresRepo, authRedisRepo, tokenManager)
+			service := AuthService.NewAuthService(authPostgresRepo, authRedisRepo, tokenManager)
 
 			tokens, err := service.SignIn(testCase.inputUser)
 
@@ -317,9 +318,9 @@ func TestService_RefreshTokens(t *testing.T) {
 			name:              "OK",
 			inputRefreshToken: "refresh_token",
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, refreshToken string) {
-				redisMock.EXPECT().GetUserWithRefreshToken(refreshToken).Return(User{}, errors.New("cache miss"))
+				redisMock.EXPECT().GetUserWithRefreshToken(refreshToken).Return(AuthService.User{}, errors.New("cache miss"))
 
-				r.EXPECT().GetUserByRefreshToken(refreshToken).Return(User{
+				r.EXPECT().GetUserByRefreshToken(refreshToken).Return(AuthService.User{
 					ID:       1,
 					UserName: "test",
 					Email:    "test@test.com",
@@ -339,7 +340,7 @@ func TestService_RefreshTokens(t *testing.T) {
 			inputRefreshToken: "refresh_token",
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, refreshTokenHash string) {
 				redisMock.EXPECT().GetUserWithRefreshToken(refreshTokenHash).
-					Return(User{
+					Return(AuthService.User{
 						ID:       1,
 						UserName: "test",
 						Email:    "test@test.com",
@@ -357,8 +358,8 @@ func TestService_RefreshTokens(t *testing.T) {
 			name:              "Fail Get User From Repo",
 			inputRefreshToken: "refresh_token",
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, refreshToken string) {
-				redisMock.EXPECT().GetUserWithRefreshToken(refreshToken).Return(User{}, errors.New("cache miss"))
-				r.EXPECT().GetUserByRefreshToken(refreshToken).Return(User{}, errors.New("error get user"))
+				redisMock.EXPECT().GetUserWithRefreshToken(refreshToken).Return(AuthService.User{}, errors.New("cache miss"))
+				r.EXPECT().GetUserByRefreshToken(refreshToken).Return(AuthService.User{}, errors.New("error get user"))
 			},
 			tokenBehavior: func(t *mockauthservice.MockTokenManager) {},
 			expectedToken: "",
@@ -368,9 +369,9 @@ func TestService_RefreshTokens(t *testing.T) {
 			name:              "Fail Create New JWT",
 			inputRefreshToken: "refresh_token",
 			repoBehavior: func(r *mockauthservice.MockAuthPostgresRepo, redisMock *mockauthservice.MockAuthRedisRepo, refreshToken string) {
-				redisMock.EXPECT().GetUserWithRefreshToken(refreshToken).Return(User{}, errors.New("cache miss"))
+				redisMock.EXPECT().GetUserWithRefreshToken(refreshToken).Return(AuthService.User{}, errors.New("cache miss"))
 
-				r.EXPECT().GetUserByRefreshToken(refreshToken).Return(User{
+				r.EXPECT().GetUserByRefreshToken(refreshToken).Return(AuthService.User{
 					ID:       1,
 					UserName: "test",
 					Email:    "test@test.com",
@@ -399,7 +400,7 @@ func TestService_RefreshTokens(t *testing.T) {
 			authRedisRepo := mockauthservice.NewMockAuthRedisRepo(c)
 			testCase.repoBehavior(authPostgresRepo, authRedisRepo, hex.EncodeToString(hash[:]))
 
-			service := NewAuthService(authPostgresRepo, authRedisRepo, tokenManager)
+			service := AuthService.NewAuthService(authPostgresRepo, authRedisRepo, tokenManager)
 
 			token, err := service.RefreshTokens(testCase.inputRefreshToken)
 
