@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
 	mock_AuthService "github.com/jst-Frenzy/ControlSystem/AuthService/internal/mocks"
 	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen"
 	"google.golang.org/grpc/codes"
@@ -28,12 +29,17 @@ func TestServer_ValidateToken(t *testing.T) {
 			inputValidateTokenRequest: &gen.ValidateTokenRequest{AccessToken: "access_token"},
 			inputAccessToken:          "access_token",
 			mockBehavior: func(s *mock_AuthService.MockAuthService, accessToken string) {
-				s.EXPECT().ParseToken(accessToken).Return(1, "user", nil)
+				s.EXPECT().ParseToken(accessToken).Return(AuthService.InfoFromToken{
+					ID:       1,
+					Role:     "user",
+					UserName: "test name",
+				}, nil)
 			},
 			expectedValidateTokenResponse: &gen.ValidateTokenResponse{
-				Valid:  true,
-				UserId: "1",
-				Role:   "user",
+				Valid:    true,
+				UserId:   "1",
+				Role:     "user",
+				UserName: "test name",
 			},
 			expectedError: nil,
 		},
@@ -50,7 +56,7 @@ func TestServer_ValidateToken(t *testing.T) {
 			inputValidateTokenRequest: &gen.ValidateTokenRequest{AccessToken: "access_token"},
 			inputAccessToken:          "access_token",
 			mockBehavior: func(s *mock_AuthService.MockAuthService, accessToken string) {
-				s.EXPECT().ParseToken(accessToken).Return(0, "", errors.New("fail parse"))
+				s.EXPECT().ParseToken(accessToken).Return(AuthService.InfoFromToken{}, errors.New("fail parse"))
 			},
 			expectedValidateTokenResponse: &gen.ValidateTokenResponse{
 				Valid:  false,

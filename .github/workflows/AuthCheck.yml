@@ -1,18 +1,126 @@
-name: Lint
+name: Lint and tests
+
 on: push
+
 jobs:
-  lint:
+  auth-lint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./AuthService
+
     steps:
       - name: CheckOut
         uses: actions/checkout@v6
+
       - name: Install GO
         uses: actions/setup-go@v6
         with:
-          go-version: '1.23'
+          go-version: '1.24'
+          cache-dependency-path: ./AuthService/go.sum
+
+      - name: Install mockgen
+        run: go install github.com/golang/mock/mockgen@latest
+
+      - name: Generate mocks
+        run: go generate ./...
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          working-directory: ./AuthService
+
+  auth-tests:
+    runs-on: ubuntu-latest
+    needs: auth-lint
+    defaults:
+      run:
+        working-directory: ./AuthService
+
+    steps:
+      - name: CheckOut
+        uses: actions/checkout@v6
+
+      - name: Install GO
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.24'
           cache: 'true'
-      - run: go version
+          cache-dependency-path: ./AuthService/go.sum
+
+      - name: Install mockgen
+        run: go install github.com/golang/mock/mockgen@latest
+
+      - name: Generate mocks
+        run: go generate ./...
+
       - name: Install deps
         run: go mod download
-      - name: Lint
-        run: make lint
+
+      - name: Run tests
+        run: go test ./...
+
+  goods-lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./GoodsService
+
+    steps:
+      - name: CheckOut
+        uses: actions/checkout@v6
+
+      - name: Install GO
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.24'
+          cache-dependency-path: ./GoodsService/go.sum
+
+      - name: Install mockgen
+        run: go install github.com/golang/mock/mockgen@latest
+
+      - name: Generate mocks
+        run: go generate ./...
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          working-directory: ./GoodsService
+
+  goods-tests:
+    runs-on: ubuntu-latest
+    needs: goods-lint
+    defaults:
+      run:
+        working-directory: ./GoodsService
+
+    steps:
+      - name: CheckOut
+        uses: actions/checkout@v6
+
+      - name: Install GO
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.24'
+          cache: 'true'
+          cache-dependency-path: ./GoodsService/go.sum
+
+      - name: Install mockgen
+        run: go install github.com/golang/mock/mockgen@latest
+
+      - name: Generate mocks
+        run: go generate ./...
+
+      - name: Install deps
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./...

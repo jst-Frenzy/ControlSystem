@@ -165,6 +165,8 @@ func TestService_signIn(t *testing.T) {
 					PasswordHash: string(hashedPassword),
 				}, nil)
 
+				redisMock.EXPECT().AddUserWithEmail(gomock.Any()).Return(nil).AnyTimes()
+
 				r.EXPECT().SaveRefreshToken(gomock.Any()).Return(nil).AnyTimes()
 
 				redisMock.EXPECT().AddUserWithRefreshToken(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
@@ -199,7 +201,8 @@ func TestService_signIn(t *testing.T) {
 					PasswordHash: string(hashedPassword),
 				}, nil)
 
-				redisMock.EXPECT().AddUserWithEmail(gomock.Any()).Return(nil)
+				redisMock.EXPECT().AddUserWithEmail(gomock.Any()).Return(nil).AnyTimes()
+				redisMock.EXPECT().AddUserWithRefreshToken(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 			},
 			tokenBehavior: func(t *mockauthservice.MockTokenManager) {
 				t.EXPECT().NewJWT(gomock.Any(), gomock.Any()).Return("", errors.New("error generate JWT"))
@@ -230,7 +233,7 @@ func TestService_signIn(t *testing.T) {
 					PasswordHash: string(hashedPassword),
 				}, nil)
 
-				redisMock.EXPECT().AddUserWithEmail(gomock.Any()).Return(nil)
+				redisMock.EXPECT().AddUserWithEmail(gomock.Any()).Return(nil).AnyTimes()
 			},
 			tokenBehavior: func(t *mockauthservice.MockTokenManager) {
 				t.EXPECT().NewJWT(gomock.Any(), gomock.Any()).Return("access_token", nil)

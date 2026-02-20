@@ -11,7 +11,7 @@ import (
 
 //go:generate mockgen -source=mongoRep.go -destination=../mocks/mockMongo.go -package=mocks
 
-type GoodsMongoRep interface {
+type GoodsMongoRepo interface {
 	GetGoods() ([]Item, error)
 
 	GetQuantity(string) (int, error)
@@ -31,7 +31,7 @@ type goodsMongoRepo struct {
 	ctx              context.Context
 }
 
-func NewGoodsMongoRepo(client *mongo.Client) GoodsMongoRep {
+func NewGoodsMongoRepo(client *mongo.Client) GoodsMongoRepo {
 	db := client.Database("GoodsInfo")
 	return &goodsMongoRepo{
 		itemCollection:   db.Collection("goods"),

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
+	"github.com/jst-Frenzy/ControlSystem/AuthService/internal/AuthService"
 	mock_AuthService "github.com/jst-Frenzy/ControlSystem/AuthService/internal/mocks"
 	"net/http/httptest"
 	"testing"
@@ -29,7 +30,10 @@ func TestHandler_userIdentity(t *testing.T) {
 			headerValue: "Bearer token",
 			token:       "token",
 			mockBehavior: func(s *mock_AuthService.MockAuthService, token string) {
-				s.EXPECT().ParseToken(token).Return(1, "user", nil)
+				s.EXPECT().ParseToken(token).Return(AuthService.InfoFromToken{
+					ID:   1,
+					Role: "user",
+				}, nil)
 			},
 			expectedStatusCode:   200,
 			expectedResponseBody: `{"id":1, "role":"user"}`,
@@ -63,7 +67,7 @@ func TestHandler_userIdentity(t *testing.T) {
 			headerValue: "Bearer token",
 			token:       "token",
 			mockBehavior: func(s *mock_AuthService.MockAuthService, token string) {
-				s.EXPECT().ParseToken(token).Return(0, "", errors.New("failed to parse token"))
+				s.EXPECT().ParseToken(token).Return(AuthService.InfoFromToken{}, errors.New("failed to parse token"))
 			},
 			expectedStatusCode:   401,
 			expectedResponseBody: `{"Message":"failed to parse token"}`,

@@ -15,10 +15,10 @@ type GoodService interface {
 }
 
 type goodService struct {
-	repo GoodsMongoRep
+	repo GoodsMongoRepo
 }
 
-func NewGoodService(repo GoodsMongoRep) GoodService {
+func NewGoodService(repo GoodsMongoRepo) GoodService {
 	return &goodService{repo: repo}
 }
 
