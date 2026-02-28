@@ -33,6 +33,7 @@ func TestServer_ValidateToken(t *testing.T) {
 					ID:       1,
 					Role:     "user",
 					UserName: "test name",
+					CartID:   "cart id",
 				}, nil)
 			},
 			expectedValidateTokenResponse: &gen.ValidateTokenResponse{
@@ -40,6 +41,7 @@ func TestServer_ValidateToken(t *testing.T) {
 				UserId:   "1",
 				Role:     "user",
 				UserName: "test name",
+				CartId:   "cart id",
 			},
 			expectedError: nil,
 		},

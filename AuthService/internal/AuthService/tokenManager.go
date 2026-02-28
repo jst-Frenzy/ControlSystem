@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -28,6 +29,7 @@ func (m *manager) NewJWT(user User, ttl time.Duration) (string, error) {
 	claims := &CustomClaims{
 		Role:     user.Role,
 		UserName: user.UserName,
+		CartID:   strconv.Itoa(user.ID),
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(ttl).Unix(),
 			IssuedAt:  time.Now().Unix(),
@@ -73,6 +75,7 @@ func (m *manager) Parse(accessToken string) (InfoFromToken, error) {
 			ID:       userID,
 			Role:     claims.Role,
 			UserName: claims.UserName,
+			CartID:   claims.CartID,
 		}, nil
 	}
 

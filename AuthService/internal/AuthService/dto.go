@@ -18,6 +18,7 @@ type Tokens struct {
 type CustomClaims struct {
 	Role     string `json:"role"`
 	UserName string `json:"userName"`
+	CartID   string `json:"cartID"`
 	jwt.StandardClaims
 }
 
@@ -40,4 +41,5 @@ type InfoFromToken struct {
 	ID       int
 	Role     string
 	UserName string
+	CartID   string
 }

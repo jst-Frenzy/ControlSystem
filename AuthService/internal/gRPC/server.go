@@ -82,5 +82,6 @@ func (s *Server) ValidateToken(ctx context.Context, req *gen.ValidateTokenReques
 		UserId:   strconv.Itoa(info.ID),
 		Role:     info.Role,
 		UserName: info.UserName,
+		CartId:   info.CartID,
 	}, nil
 }
