@@ -16,4 +16,5 @@ message ValidateTokenResponse {
   string user_id = 2;
   string role = 3;
   string user_name = 4;
+  string cart_id = 5;
 }
