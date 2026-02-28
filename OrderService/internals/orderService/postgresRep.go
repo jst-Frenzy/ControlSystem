@@ -1,1 +1,29 @@
 package orderService
+
+import "gorm.io/gorm"
+
+type OrderPostgresRep interface {
+	AddToCart(CartItem) (int, error)
+	RemoveFromCart(int, int) error
+	GetCart(int) ([]CartItem, error)
+}
+
+type orderPostgresRep struct {
+	db *gorm.DB
+}
+
+func NewOrderPostgresRep(db *gorm.DB) OrderPostgresRep {
+	return &orderPostgresRep{db: db}
+}
+
+func (r *orderPostgresRep) AddToCart(CartItem) (int, error) {
+	return 0, nil
+}
+
+func (r *orderPostgresRep) RemoveFromCart(int, int) error {
+	return nil
+}
+
+func (r *orderPostgresRep) GetCart(int) ([]CartItem, error) {
+	return []CartItem{}, nil
+}
