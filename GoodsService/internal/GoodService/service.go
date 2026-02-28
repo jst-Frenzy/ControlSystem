@@ -12,6 +12,8 @@ type GoodService interface {
 	AddItem(Item, UserCtx) (string, error)
 	DeleteItem(string, int) error
 	UpdateItem(Item, int) (Item, error)
+
+	GetItemInfoForCart(string) (ItemInfoForCart, error)
 }
 
 type goodService struct {
@@ -69,4 +71,8 @@ func (s *goodService) UpdateItem(i Item, userID int) (Item, error) {
 	}
 	i.SellerID = sellerID
 	return s.repo.UpdateItem(i)
+}
+
+func (s *goodService) GetItemInfoForCart(id string) (ItemInfoForCart, error) {
+	return s.repo.GetItemInfoForCart(id)
 }

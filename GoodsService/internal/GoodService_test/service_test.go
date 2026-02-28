@@ -346,3 +346,46 @@ func TestService_getGoods(t *testing.T) {
 		})
 	}
 }
+
+func TestService_getItemInfoForCart(t *testing.T) {
+	type mockBehavior func(r *mock.MockGoodsMongoRepo, id string)
+	testTable := []struct {
+		name          string
+		inputID       string
+		mockBehavior  mockBehavior
+		expectedInfo  GoodService.ItemInfoForCart
+		expectedError error
+	}{
+		{
+			name: "OK",
+			mockBehavior: func(r *mock.MockGoodsMongoRepo, id string) {
+				r.EXPECT().GetItemInfoForCart(id).Return(GoodService.ItemInfoForCart{
+					Quantity: 10,
+					Price:    6,
+				}, nil)
+			},
+			expectedInfo: GoodService.ItemInfoForCart{
+				Quantity: 10,
+				Price:    6,
+			},
+			expectedError: nil,
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			mongoRep := mock.NewMockGoodsMongoRepo(c)
+			testCase.mockBehavior(mongoRep, testCase.inputID)
+
+			serv := GoodService.NewGoodService(mongoRep)
+
+			inf, err := serv.GetItemInfoForCart(testCase.inputID)
+
+			assert.Equal(t, inf, testCase.expectedInfo)
+			assert.Equal(t, err, testCase.expectedError)
+		})
+	}
+}

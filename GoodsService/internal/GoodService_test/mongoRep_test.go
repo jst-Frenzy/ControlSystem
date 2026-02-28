@@ -686,3 +686,112 @@ func TestMongoRep_getItemByID(t *testing.T) {
 		})
 	}
 }
+
+func TestMongoRep_getItemInfoForCart(t *testing.T) {
+	type mockBehavior func(m *mtest.T)
+
+	testTable := []struct {
+		name         string
+		inputItemId  string
+		mockBehavior mockBehavior
+		expectedInfo GoodService.ItemInfoForCart
+		wantErr      bool
+	}{
+		{
+			name:        "OK",
+			inputItemId: "507f1f77bcf86cd799439011",
+			mockBehavior: func(m *mtest.T) {
+				objectID, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439011")
+				response := mtest.CreateCursorResponse(1, "item.test", mtest.FirstBatch,
+					bson.D{
+						{Key: "_id", Value: objectID},
+						{Key: "name", Value: "apple"},
+						{Key: "description", Value: "tasty apple"},
+						{Key: "quantity", Value: 15},
+						{Key: "price", Value: 6},
+						{Key: "seller_id", Value: "100"},
+					})
+				m.AddMockResponses(response)
+			},
+			expectedInfo: GoodService.ItemInfoForCart{
+				Quantity: 15,
+				Price:    6,
+			},
+			wantErr: false,
+		},
+		{
+			name:        "OK",
+			inputItemId: "507f1f77bcf86cd799439011",
+			mockBehavior: func(m *mtest.T) {
+				objectID, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439011")
+				response := mtest.CreateCursorResponse(1, "item.test", mtest.FirstBatch,
+					bson.D{
+						{Key: "_id", Value: objectID},
+						{Key: "name", Value: "apple"},
+						{Key: "description", Value: "tasty apple"},
+						{Key: "quantity", Value: 15},
+						{Key: "price", Value: 6},
+						{Key: "seller_id", Value: "100"},
+					})
+				m.AddMockResponses(response)
+			},
+			expectedInfo: GoodService.ItemInfoForCart{
+				Quantity: 15,
+				Price:    6,
+			},
+			wantErr: false,
+		},
+		{
+			name:         "Cant parse itemId",
+			inputItemId:  "1",
+			mockBehavior: func(m *mtest.T) {},
+			expectedInfo: GoodService.ItemInfoForCart{},
+			wantErr:      true,
+		},
+		{
+			name:        "Item not found",
+			inputItemId: "507f1f77bcf86cd799439011",
+			mockBehavior: func(m *mtest.T) {
+				response := bson.D{
+					{Key: "ok", Value: 1},
+					{Key: "value", Value: nil},
+				}
+				m.AddMockResponses(response)
+			},
+			expectedInfo: GoodService.ItemInfoForCart{},
+			wantErr:      true,
+		},
+		{
+			name:        "Decode error",
+			inputItemId: "507f1f77bcf86cd799439011",
+			mockBehavior: func(m *mtest.T) {
+				response := bson.D{
+					{Key: "ok", Value: 1},
+					{Key: "value", Value: nil},
+					{Key: "errmsg", Value: "decode error"},
+				}
+				m.AddMockResponses(response)
+			},
+			expectedInfo: GoodService.ItemInfoForCart{},
+			wantErr:      true,
+		},
+	}
+
+	for _, testCase := range testTable {
+		mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
+		mt.Run(testCase.name, func(mt *mtest.T) {
+			mongoRepo := GoodService.NewGoodsMongoRepo(mt.Client)
+
+			testCase.mockBehavior(mt)
+
+			inf, err := mongoRepo.GetItemInfoForCart(testCase.inputItemId)
+
+			if testCase.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, inf, testCase.expectedInfo)
+		})
+	}
+}

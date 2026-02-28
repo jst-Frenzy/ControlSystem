@@ -23,6 +23,8 @@ type GoodsMongoRepo interface {
 	GetSellerIDByUserID(int) (string, error)
 	GetItemByID(string) (Item, error)
 	CreateSeller(int, string) (string, error)
+
+	GetItemInfoForCart(string) (ItemInfoForCart, error)
 }
 
 type goodsMongoRepo struct {
@@ -193,6 +195,25 @@ func (r *goodsMongoRepo) GetItemByID(id string) (Item, error) {
 			return Item{}, errors.New("item not found")
 		}
 		return Item{}, errDecode
+	}
+
+	return i, nil
+}
+
+func (r *goodsMongoRepo) GetItemInfoForCart(id string) (ItemInfoForCart, error) {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return ItemInfoForCart{}, err
+	}
+
+	filter := bson.D{{Key: "_id", Value: objectID}}
+	res := r.itemCollection.FindOne(r.ctx, filter)
+	var i ItemInfoForCart
+	if errDecode := res.Decode(&i); errDecode != nil {
+		if errors.Is(errDecode, mongo.ErrNoDocuments) {
+			return ItemInfoForCart{}, errors.New("item not found")
+		}
+		return ItemInfoForCart{}, errDecode
 	}
 
 	return i, nil

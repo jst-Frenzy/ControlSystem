@@ -29,11 +29,12 @@ func TestHandler_addItem(t *testing.T) {
 	}{
 		{
 			name:      "OK",
-			inputBody: `{"name": "testName", "description": "test description", "quantity": 1}`,
+			inputBody: `{"name": "testName", "description": "test description", "quantity": 1, "price": 6}`,
 			inputItem: GoodService.Item{
 				Name:        "testName",
 				Description: "test description",
 				Quantity:    1,
+				Price:       6,
 			},
 			inputUserCtx: GoodService.UserCtx{
 				ID:   1,
@@ -65,11 +66,12 @@ func TestHandler_addItem(t *testing.T) {
 		},
 		{
 			name:      "Service Error",
-			inputBody: `{"name": "testName", "description": "test description", "quantity": 1}`,
+			inputBody: `{"name": "testName", "description": "test description", "quantity": 1, "price": 6}`,
 			inputItem: GoodService.Item{
 				Name:        "testName",
 				Description: "test description",
 				Quantity:    1,
+				Price:       6,
 			},
 			inputUserCtx: GoodService.UserCtx{
 				ID:   1,
@@ -282,19 +284,21 @@ func TestHandler_updateItem(t *testing.T) {
 				Name:        "apple",
 				Description: "new description",
 				Quantity:    10,
+				Price:       6,
 			},
-			inputBody: `{"_id":"123","name":"apple","description":"new description","quantity": 10}`,
+			inputBody: `{"_id":"123","name":"apple","description":"new description","quantity": 10,"price":6}`,
 			mockBehavior: func(s *mock.MockGoodService, i GoodService.Item, userID int) {
 				s.EXPECT().UpdateItem(i, userID).Return(GoodService.Item{
 					ID:          "123",
 					Name:        "apple",
 					Description: "new description",
 					Quantity:    10,
+					Price:       6,
 					SellerID:    "1",
 				}, nil)
 			},
 			expectedStatusCode:   200,
-			expectedResponseBody: `{"_id":"123","name":"apple","description":"new description","quantity":10,"sellerID":"1"}`,
+			expectedResponseBody: `{"_id":"123","name":"apple","description":"new description","quantity":10,"price":6,"sellerID":"1"}`,
 		},
 		{
 			name:                 "Incorrect role",
@@ -319,8 +323,9 @@ func TestHandler_updateItem(t *testing.T) {
 				Name:        "apple",
 				Description: "new description",
 				Quantity:    10,
+				Price:       6,
 			},
-			inputBody: `{"_id":"123","name":"apple","description":"new description","quantity": 10}`,
+			inputBody: `{"_id":"123","name":"apple","description":"new description","quantity": 10,"price": 6}`,
 			mockBehavior: func(s *mock.MockGoodService, i GoodService.Item, userID int) {
 				s.EXPECT().UpdateItem(i, userID).Return(GoodService.Item{}, errors.New("server failure"))
 			},
