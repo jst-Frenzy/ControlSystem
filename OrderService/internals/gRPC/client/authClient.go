@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
-	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen"
+	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"time"

@@ -57,6 +57,8 @@ github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnr
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260228163428-0828aff450e2 h1:Y3QLbUV2atwUUvP9fj474bBnO9Y4YztO07NfiqnVfTk=
 github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260228163428-0828aff450e2/go.mod h1:08Ez0uf/NN2wp1cnHNWAdNu+80g3kCGIUybS5tFc1TQ=
+github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260301124958-1aaeee108905 h1:4PlR0uWO5FTigJOwvVMZ12tm1LmTKiMdwLhMcKWRByI=
+github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260301124958-1aaeee108905/go.mod h1:08Ez0uf/NN2wp1cnHNWAdNu+80g3kCGIUybS5tFc1TQ=
 github.com/klauspost/cpuid/v2 v2.3.0 h1:S4CRMLnYUhGeDFDqkGriYKdfoFlDnMtqTiI/sFzhA9Y=
 github.com/klauspost/cpuid/v2 v2.3.0/go.mod h1:hqwkgyIinND0mEev00jJYCxPNVRVXFQeu1XKlok6oO0=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=

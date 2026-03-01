@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
-	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260228163428-0828aff450e2
+	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260301124958-1aaeee108905
 	github.com/sirupsen/logrus v1.9.4
 	google.golang.org/grpc v1.78.0
 	gorm.io/driver/postgres v1.6.0

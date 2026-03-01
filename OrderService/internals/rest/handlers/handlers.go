@@ -40,13 +40,13 @@ func (h *OrderHandler) GetCart(ctx *gin.Context) {
 	nameHandler := "GetCart"
 	cartID := ctx.MustGet("CartID").(int)
 
-	cart, totalPrice, err := h.serv.GetCart(cartID)
+	cart, totalPrice, err := h.serv.GetCart(cartID, ctx)
 	if err != nil {
 		newErrorResponse(ctx, nameHandler, http.StatusInternalServerError, err.Error())
 	}
 
 	type ItemStruct struct {
-		ProductID int
+		ProductID string
 		quantity  int
 		price     float64
 	}
