@@ -3,16 +3,16 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/GoodService"
-	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/gRPC"
+	"github.com/jst-Frenzy/ControlSystem/GoodsService/internal/gRPC/client"
 	"net/http"
 )
 
 type GoodsHandlers struct {
 	serv       GoodService.GoodService
-	authClient gRPC.AuthClient
+	authClient client.AuthClient
 }
 
-func NewGoodsHandlers(serv GoodService.GoodService, authClient gRPC.AuthClient) *GoodsHandlers {
+func NewGoodsHandlers(serv GoodService.GoodService, authClient client.AuthClient) *GoodsHandlers {
 	return &GoodsHandlers{
 		serv:       serv,
 		authClient: authClient,

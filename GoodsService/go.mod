@@ -6,7 +6,8 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/golang/mock v1.6.0
-	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260211200106-9daf5332b469
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/jst-Frenzy/ControlSystem/protobuf v0.0.0-20260301105153-5cf7bd189ec5
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.17.9
@@ -25,6 +26,7 @@ require (
 	github.com/go-playground/validator/v10 v10.27.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/goccy/go-yaml v1.18.0 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect

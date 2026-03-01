@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/assert/v2"
 	"github.com/golang/mock/gomock"
 	mock "github.com/jst-Frenzy/ControlSystem/GoodsService/internal/mocks"
-	proto "github.com/jst-Frenzy/ControlSystem/protobuf/gen"
+	proto "github.com/jst-Frenzy/ControlSystem/protobuf/gen/auth"
 	"net/http/httptest"
 	"testing"
 )

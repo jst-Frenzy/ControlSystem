@@ -1,15 +1,15 @@
-package gRPC
+package client
 
 import (
 	"context"
 	"fmt"
-	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen"
+	gen "github.com/jst-Frenzy/ControlSystem/protobuf/gen/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"time"
 )
 
-//go:generate mockgen -source=authClientGRPC.go -destination=../mocks/MockAuthClient.go -package=mocks
+//go:generate mockgen -source=authClient.go -destination=../../mocks/MockAuthClient.go -package=mocks
 
 type AuthClient interface {
 	ValidateToken(ctx context.Context, token string) (*gen.ValidateTokenResponse, error)
