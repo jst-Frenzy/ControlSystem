@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package goods;
+option go_package = "./proto";
+
+service GoodsService{
+  rpc GetItemQuantityAndPrice(ItemQuantityAndPriceRequest) returns (ItemQuantityAndPriceResponse);
+}
+
+message ItemQuantityAndPriceRequest{
+  string item_id = 1;
+}
+
+message ItemQuantityAndPriceResponse{
+  bool valid = 1;
+  string quantity = 2;
+  string price = 3;
+}
