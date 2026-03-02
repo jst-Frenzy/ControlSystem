@@ -1,2 +1,2 @@
-drop table if exists users cascade;
+яdrop table if exists users cascade;
 drop table if exists refresh_tokens;

@@ -50,6 +50,23 @@ services:
     networks:
       - app-network
 
+  order-service:
+    build:
+      context: ./OrderService
+      dockerfile: Dockerfile
+    container_name: order-service
+    env_file:
+      - OrderService/.env
+    environment:
+      - GIN_MODE=release
+    ports:
+      - "8082:8082"
+    depends_on:
+      order-db:
+        condition: service_healthy
+    networks:
+      - app-network
+
   auth-db:
     image: postgres:15-alpine
     container_name: auth-db
@@ -85,6 +102,25 @@ services:
       timeout: 5s
       retries: 5
 
+  order-db:
+    image: postgres:15-alpine
+    container_name: order-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: order
+    ports:
+      - "5433:5432"
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -107,5 +143,6 @@ networks:
 
 volumes:
   auth-db-data:
+  order-db-data:
   redis-data:
   mongo-data:

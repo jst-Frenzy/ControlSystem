@@ -1,4 +1,4 @@
-DB_DSN=postgres://postgres:12345@auth-db:5432/authorization?sslmode=disable
+DB_DSN=postgres://postgres:12345@order-db:5432/order?sslmode=disable
 
 MIGRATE := migrate -path ./migrations -database $(DB_DSN)
 

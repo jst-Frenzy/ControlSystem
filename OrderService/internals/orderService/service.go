@@ -18,8 +18,11 @@ type orderService struct {
 	goodsClient client.GoodsClient
 }
 
-func NewOrderService(repo OrderPostgresRep) OrderService {
-	return &orderService{repo: repo}
+func NewOrderService(repo OrderPostgresRep, goodsClient client.GoodsClient) OrderService {
+	return &orderService{
+		repo:        repo,
+		goodsClient: goodsClient,
+	}
 }
 
 func (s *orderService) AddToCart(i CartItem) (int, error) {
@@ -39,8 +42,8 @@ func (s *orderService) GetCart(cartID int, ctx context.Context) ([]CartItem, flo
 
 	var totalPrice float64
 
-	for _, item := range cart {
-		resp, errGet := s.goodsClient.GetItemQuantityAndPrice(ctx, item.ProductID)
+	for i := range cart {
+		resp, errGet := s.goodsClient.GetItemQuantityAndPrice(ctx, cart[i].ProductID)
 		if errGet != nil {
 			return nil, 0, errGet
 		}
@@ -49,12 +52,13 @@ func (s *orderService) GetCart(cartID int, ctx context.Context) ([]CartItem, flo
 		}
 		price, _ := strconv.ParseFloat(resp.Price, 64)
 		quantity, _ := strconv.Atoi(resp.Quantity)
-		if price != item.Price {
-			item.Price = price
+		if price != cart[i].Price {
+			cart[i].Price = price
 		}
-		if quantity != item.Quantity {
-			item.Quantity = quantity
+		if quantity != cart[i].Quantity {
+			cart[i].Quantity = quantity
 		}
+		totalPrice += price
 	}
 
 	return cart, totalPrice, nil

@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -29,7 +30,10 @@ func main() {
 	})
 
 	go func() {
-		port := 50051
+		port, errConv := strconv.Atoi(os.Getenv("GRPC_PORT_SERVER"))
+		if errConv != nil {
+			logger.Fatal("can't get grpc port from env")
+		}
 
 		if err := grpcServer.StartGRPC(port); err != nil {
 			logger.WithError(err).Fatal("gRPC server failed")

@@ -1,7 +1,10 @@
 package dataBase
 
 import (
+	"errors"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -32,7 +35,7 @@ func runMigrations(dsn string) {
 	}()
 
 	err := m.Up()
-	if err != nil {
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		logrus.WithError(err).Info("Migration failed")
 	}
 }

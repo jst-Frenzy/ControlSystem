@@ -5,6 +5,7 @@ import (
 	"github.com/jst-Frenzy/ControlSystem/OrderService/internals/gRPC/client"
 	"github.com/jst-Frenzy/ControlSystem/OrderService/internals/orderService"
 	"net/http"
+	"strconv"
 )
 
 type OrderHandler struct {
@@ -12,13 +13,17 @@ type OrderHandler struct {
 	authClient client.AuthClient
 }
 
-func NewOrderHandler(serv orderService.OrderService) *OrderHandler {
-	return &OrderHandler{serv: serv}
+func NewOrderHandler(serv orderService.OrderService, authClient client.AuthClient) *OrderHandler {
+	return &OrderHandler{
+		serv:       serv,
+		authClient: authClient,
+	}
 }
 
 func (h *OrderHandler) AddToCart(ctx *gin.Context) {
 	nameHandler := "AddToCart"
-	cartID := ctx.MustGet("CartID").(int)
+	cartIDstr := ctx.MustGet("CartID").(string)
+	cartID, _ := strconv.Atoi(cartIDstr)
 
 	var i orderService.CartItem
 	if err := ctx.ShouldBind(&i); err != nil {
@@ -38,7 +43,8 @@ func (h *OrderHandler) AddToCart(ctx *gin.Context) {
 
 func (h *OrderHandler) GetCart(ctx *gin.Context) {
 	nameHandler := "GetCart"
-	cartID := ctx.MustGet("CartID").(int)
+	cartIDstr := ctx.MustGet("CartID").(string)
+	cartID, _ := strconv.Atoi(cartIDstr)
 
 	cart, totalPrice, err := h.serv.GetCart(cartID, ctx)
 	if err != nil {
@@ -47,8 +53,8 @@ func (h *OrderHandler) GetCart(ctx *gin.Context) {
 
 	type ItemStruct struct {
 		ProductID string
-		quantity  int
-		price     float64
+		Quantity  int
+		Price     float64
 	}
 
 	resp := make(map[string]interface{})
@@ -56,8 +62,8 @@ func (h *OrderHandler) GetCart(ctx *gin.Context) {
 	for _, i := range cart {
 		resp[i.Name] = ItemStruct{
 			ProductID: i.ProductID,
-			quantity:  i.Quantity,
-			price:     i.Price,
+			Quantity:  i.Quantity,
+			Price:     i.Price,
 		}
 	}
 
@@ -68,7 +74,8 @@ func (h *OrderHandler) GetCart(ctx *gin.Context) {
 
 func (h *OrderHandler) DeleteFromCart(ctx *gin.Context) {
 	nameHandler := "DeleteFromCart"
-	cartID := ctx.MustGet("CartID").(int)
+	cartIDstr := ctx.MustGet("CartID").(string)
+	cartID, _ := strconv.Atoi(cartIDstr)
 
 	itemID := ctx.Param("id")
 
